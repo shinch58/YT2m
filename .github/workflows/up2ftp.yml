@@ -17,17 +17,25 @@ jobs:
 
       - name: Check if y04.m3u8 exists
         run: |
+          echo "Checking if y04.m3u8 file exists"
           ls -la y04.m3u8
-          cat y04.m3u8
+          cat y04.m3u8 || echo "y04.m3u8 file does not exist or is empty"
 
       - name: Extract URLs from M3U8 and generate i.php
         run: |
-          # 提取 y04.m3u8 文件中的 URL 並生成 i.php 文件
-          grep -oP '(?<=#EXTINF:.*",https://).*(?=m3u8)' y04.m3u8 | sed 's/^/https:\/\/&m3u8/' > i.php
-          cat i.php
+          echo "Extracting URLs from y04.m3u8"
+          if grep -oP '(?<=#EXTINF:.*",https://).*(?=m3u8)' y04.m3u8 | sed 's/^/https:\/\/&m3u8/' > i.php; then
+            echo "URLs successfully extracted and i.php file created"
+            cat i.php
+          else
+            echo "Failed to extract URLs or create i.php file"
+            exit 1
+          fi
 
       - name: Install lftp
-        run: sudo apt-get update && sudo apt-get install -y lftp
+        run: |
+          echo "Installing lftp"
+          sudo apt-get update && sudo apt-get install -y lftp
 
       - name: Upload i.php to FTP
         env:
@@ -35,4 +43,10 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER -e "put i.php -o /path/to/remote/i.php; bye"
+          echo "Uploading i.php to FTP"
+          if lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER -e "put i.php -o /path/to/remote/i.php; bye"; then
+            echo "i.php successfully uploaded to FTP"
+          else
+            echo "Failed to upload i.php to FTP"
+            exit 1
+          fi
