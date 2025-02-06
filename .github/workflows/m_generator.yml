@@ -36,4 +36,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git commit -m "links are updated"
-          git push
+          git push https://github.com/shinch58/YT2m.git
