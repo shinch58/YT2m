@@ -1,4 +1,4 @@
-name: Upload M3U8 URLs to FTP
+name: Upload M3U8 URLs to SFTP
 
 on:
   push:
@@ -32,21 +32,17 @@ jobs:
             exit 1
           fi
 
-      - name: Install lftp
-        run: |
-          echo "Installing lftp"
-          sudo apt-get update && sudo apt-get install -y lftp
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Upload i.php to FTP
+      - name: Upload i.php to SFTP
         env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_SERVER: ${{ secrets.SFTP_SERVER }}
+          SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
         run: |
-          echo "Uploading i.php to FTP"
-          if lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER -e "put i.php -o /path/to/remote/i.php; bye"; then
-            echo "i.php successfully uploaded to FTP"
-          else
-            echo "Failed to upload i.php to FTP"
-            exit 1
-          fi
+          echo "Uploading i.php to SFTP"
+          sshpass -p $SFTP_PASSWORD sftp -o StrictHostKeyChecking=no $SFTP_USERNAME@$SFTP_SERVER <<EOF
+          put i.php /path/to/remote/i.php
+          bye
+EOF
