@@ -1,0 +1,33 @@
+name: Upload M3U8 URLs to FTP
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Extract URLs from M3U8 and generate i.php
+        run: |
+          # 提取 y04.m3u8 文件中的 URL 並生成 i.php 文件
+          grep -oP '(?<=#EXTINF:.*",https://).*(?=m3u8)' y04.m3u8 | sed 's/^/https:\/\/&m3u8/' > i.php
+          cat i.php
+
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: Upload i.php to FTP
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER -e "put i.php -o /path/to/remote/i.php; bye"
