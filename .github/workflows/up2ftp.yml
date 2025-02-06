@@ -35,6 +35,13 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
+      - name: Create SFTP upload script
+        run: |
+          echo "Creating SFTP upload script"
+          echo "put i.php /jstsz.atwebpages.com/i.php" > upload_script.sftp
+          echo "bye" >> upload_script.sftp
+          cat upload_script.sftp
+
       - name: Upload i.php to SFTP
         env:
           SFTP_SERVER: ${{ secrets.SFTP_SERVER }}
@@ -42,7 +49,4 @@ jobs:
           SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
         run: |
           echo "Uploading i.php to SFTP"
-          sshpass -p $SFTP_PASSWORD sftp -o StrictHostKeyChecking=no -P 221 $SFTP_USERNAME@$SFTP_SERVER << 'EOT'
-put i.php /jstsz.atwebpages.com/i.php
-bye
-EOT
+          sshpass -p $SFTP_PASSWORD sftp -o StrictHostKeyChecking=no -P 221 -b upload_script.sftp $SFTP_USERNAME@$SFTP_SERVER
