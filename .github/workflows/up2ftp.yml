@@ -45,4 +45,3 @@ jobs:
           sshpass -p $SFTP_PASSWORD sftp -o StrictHostKeyChecking=no $SFTP_USERNAME@$SFTP_SERVER <<EOF
           put i.php /path/to/remote/i.php
           bye
-EOF
