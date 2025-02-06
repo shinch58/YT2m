@@ -42,6 +42,7 @@ jobs:
           SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
         run: |
           echo "Uploading i.php to SFTP"
-          sshpass -p $SFTP_PASSWORD sftp -o StrictHostKeyChecking=no $SFTP_USERNAME@$SFTP_SERVER <<EOF
-          put i.php /path/to/remote/i.php
+          sshpass -p $SFTP_PASSWORD sftp -o StrictHostKeyChecking=no -P 221 $SFTP_USERNAME@$SFTP_SERVER <<EOF
+          put i.php /jstsz.atwebpages.com/i.php
           bye
+EOF
