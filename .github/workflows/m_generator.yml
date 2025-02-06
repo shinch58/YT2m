@@ -33,7 +33,7 @@ jobs:
 
       - name: commit & push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git commit -m "links are updated"
           git push
