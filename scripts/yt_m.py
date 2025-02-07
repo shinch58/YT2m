@@ -1,61 +1,64 @@
+#! /usr/bin/python3
+
+import requests
 import os
 import re
-import time
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 
-# 設定輸出目錄
+INPUT_FILE = "yt_info.txt"
 OUTPUT_DIR = "output"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+PLACEHOLDER_URL = "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/moose_na.m3u"
 
-# 設定 Selenium 瀏覽器選項
-chrome_options = Options()
-chrome_options.add_argument("--headless")  # 無頭模式
-chrome_options.add_argument("--disable-gpu")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
+def extract_m3u8(url):
+    """ 從 YouTube 直播頁面提取 .m3u8 連結 """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"❌ 無法請求 {url}: {e}")
+        return None
 
-def get_m3u8_url(youtube_url):
-    """使用 Selenium 爬取 YouTube 頁面，解析 M3U8 連結"""
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get(youtube_url)
-    time.sleep(5)  # 等待 YouTube 動態內容載入
+    matches = re.findall(r'https://[^\s]+\.m3u8', response.text)
+    return matches[0] if matches else None
 
-    page_source = driver.page_source
-    driver.quit()
+def process_channels():
+    """ 解析 yt_info.txt 並生成 M3U8 清單 """
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
 
-    # 在 HTML 內查找 hlsManifestUrl
-    match = re.search(r'"hlsManifestUrl":"(https:[^"]+)"', page_source)
-    if match:
-        return match.group(1).replace("\\u0026", "&")
+    with open(INPUT_FILE, "r", encoding="utf-8") as file:
+        lines = file.readlines()
 
-    print(f"❌ 解析失敗: {youtube_url}")
-    return None
+    for idx, line in enumerate(lines, start=1):
+        line = line.strip()
+        if not line or line.startswith("~~"):
+            continue
 
-def parse_yt_info():
-    """解析 yt_info.txt 並生成 M3U8 檔案"""
-    with open("yt_info.txt", "r", encoding="utf-8") as file:
-        lines = [line.strip() for line in file if line.strip()]
+        parts = line.split("|")
+        if len(parts) < 2:
+            print(f"❌ 格式錯誤: {line}")
+            continue
 
-    channels = []
-    for i in range(2, len(lines), 2):
-        if i + 1 < len(lines):
-            meta, url = lines[i], lines[i + 1]
-            name = meta.split("|")[0].strip()
-            channels.append((name, url))
+        name = parts[0].strip()
+        url = parts[1].strip()
 
-    for idx, (name, url) in enumerate(channels):
         print(f"🔍 解析: {name} ({url})")
-        m3u8_url = get_m3u8_url(url)
-        if m3u8_url:
-            m3u8_content = f"EXTM3U\n#EXTINF:-1 ,{name}\n{m3u8_url}\n"
-            output_file = os.path.join(OUTPUT_DIR, f"y{idx+1:02d}.m3u8")
-            with open(output_file, "w", encoding="utf-8") as f:
-                f.write(m3u8_content)
-            print(f"✅  已生成 {output_file}")
-        else:
-            print(f"❌  解析 {name} 失敗")
+        m3u8_url = extract_m3u8(url)
+
+        if not m3u8_url:
+            print(f"❌  解析 {name} 失敗，使用預設 M3U8")
+            m3u8_url = PLACEHOLDER_URL
+
+        output_file = os.path.join(OUTPUT_DIR, f"y{idx:02d}.m3u8")
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write("#EXTM3U\n")
+            f.write(f"#EXTINF:-1 ,{name}\n")
+            f.write(f"{m3u8_url}\n")
+
+        print(f"✅ 已生成 {output_file} ({name})")
 
 if __name__ == "__main__":
-    parse_yt_info()
+    process_channels()
