@@ -7,6 +7,8 @@ ls -lh
 
 # 安裝 Python 依賴
 python3 -m pip install requests
+# 安裝 yt-dlp（確保 GitHub Actions 可以解析 YouTube 直播）
+python3 -m pip install yt-dlp
 
 # 切換到 scripts 目錄
 cd "$(dirname "$0")/scripts/"
