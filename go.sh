@@ -6,6 +6,7 @@ echo $(dirname $0)
 # 安裝所需的 Python 模組（如果還未安裝）
 python3 -m pip install requests yt-dlp
 python3 -m pip install --upgrade yt-dlp
+sudo apt-get install ffmpeg
 
 # 檢查並創建 output 資料夾（如果不存在）
 if [ ! -d "./output" ]; then
