@@ -25,3 +25,6 @@ jobs:
 
     - name: Run go.sh and capture logs
       run: ./go.sh | tee go_log.txt
+      
+    - name: Make go.sh executable
+      run: chmod +x go.sh && ls -lh go.sh  # 確保 go.sh 有執行權限
