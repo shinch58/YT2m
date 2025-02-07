@@ -1,31 +1,15 @@
 #!/bin/bash
 
-echo "🔵 go.sh: 開始執行..."
-echo "🔵 當前目錄: $(pwd)"
-echo "🔵 顯示檔案列表:"
-ls -lh
+# 打印腳本所在的目錄
+echo $(dirname $0)
 
-# 安裝 Python 依賴
-python3 -m pip install -q requests yt-dlp
+# 安裝所需的 Python 模組（如果還未安裝）
+python3 -m pip install requests yt-dlp
 
-# 確保 `yt_m.py` 存在並可執行
-if [[ ! -f scripts/yt_m.py ]]; then
-    echo "❌ 錯誤: 找不到 scripts/yt_m.py"
-    exit 1
+# 檢查並創建 output 資料夾（如果不存在）
+if [ ! -d "./output" ]; then
+    mkdir ./output
 fi
 
-# 執行 yt_m.py
-echo "🔵 執行 yt_m.py..."
-python3 scripts/yt_m.py || { echo "❌ yt_m.py 執行失敗"; exit 1; }
-
-# 確保 output/ 目錄存在
-if [[ ! -d output ]]; then
-    echo "❌ 錯誤: output/ 目錄未創建"
-    exit 1
-fi
-
-# 顯示 output/ 內容
-echo "🔵 確認 output/ 目錄內容:"
-ls -lh output/
-
-echo "🟢 go.sh: 執行完成"
+# 運行 yt_m.py 腳本
+python3 scripts/yt_m.py
