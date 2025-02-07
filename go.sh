@@ -9,5 +9,5 @@ python3 -m pip install requests
 # 切換到腳本所在目錄
 cd $(dirname $0)/scripts/
 
-# 運行 yt_m3ugrabber.py 腳本
+# 運行 yt_m.py 腳本
 python3 yt_m.py
