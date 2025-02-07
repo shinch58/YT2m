@@ -13,5 +13,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3  # 使用最新版的 actions/checkout
 
+    - name: Make go.sh executable
+      run: chmod +x ./go.sh  # 設置腳本為可執行
+
     - name: Run go.sh
-      run: sh ./go.sh  # 執行腳本
+      run: ./go.sh  # 執行腳本
