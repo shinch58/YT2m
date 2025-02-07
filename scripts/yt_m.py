@@ -34,9 +34,16 @@ def read_yt_info():
 def get_m3u8(url):
     """使用 yt-dlp 取得 M3U8 連結"""
     try:
+        print(f"📡 嘗試從 {url} 獲取 M3U8 連結...")
         result = subprocess.run(["yt-dlp", "-g", url], capture_output=True, text=True, timeout=30)
-        return result.stdout.strip() if "m3u8" in result.stdout else FALLBACK_M3U8
-    except:
+        print(f"📝 yt-dlp 輸出: {result.stdout}")
+        if "m3u8" in result.stdout:
+            return result.stdout.strip()
+        else:
+            print("⚠️ 未找到 M3U8 連結，使用預設連結。")
+            return FALLBACK_M3U8
+    except Exception as e:
+        print(f"❌ 發生錯誤: {e}")
         return FALLBACK_M3U8  # 發生錯誤時使用預設連結
 
 def main():
@@ -50,7 +57,7 @@ def main():
         m3u8_url = get_m3u8(url)
 
         # 生成符合格式的 M3U8 文件內容
-        content = f"EXTM3U\n#EXTINF:-1 ,{channel_name}\n{m3u8_url}"
+        content = f"#EXTM3U\n#EXTINF:-1 ,{channel_name}\n{m3u8_url}"
 
         with open(filename, "w", encoding="utf-8") as output_file:
             output_file.write(content)
