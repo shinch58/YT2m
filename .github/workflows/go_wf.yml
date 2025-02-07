@@ -1,35 +1,39 @@
-name: my mf
+name: Update Files
 
 on:
   schedule:
-    - cron: '0 */3 * * *'  # 每 3 小時運行一次
+    - cron: "0 */3 * * *"  # 每 3 小時運行一次
   workflow_dispatch:  # 允許手動觸發
 
 jobs:
-  build:
+  update_m3u8:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 檢出儲存庫
+      - name: 🛎️ 檢出代碼
         uses: actions/checkout@v4
 
-      - name: 設置 Python 環境
+      - name: 🛠️ 設置 Python 環境
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.x"
 
-      - name: 執行 yt_m.py 解析 YouTube 直播
+      - name: 📦 安裝依賴
+        run: pip install -r requirements.txt
+
+      - name: 🚀 運行 yt_m.py 解析 YouTube 直播 M3U8
         run: bash go.sh
 
-      - name: 設定 Git 用戶資訊
+      - name: 📤 提交變更
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: 提交並推送變更
-        run: |
           git add output/
-          git commit -m "📡 更新 M3U8 直播列表" || echo "⚠️ 無變更，跳過提交"
-          git push origin main
+          if git diff --cached --quiet; then
+            echo "⚠️ 無變更，跳過提交"
+          else
+            git commit -m "🔄 更新 M3U8 清單"
+            git push
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
