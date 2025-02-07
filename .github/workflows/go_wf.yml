@@ -3,7 +3,7 @@ name: My Workflow
 on:
   push:  # 在推送代碼時觸發
   schedule:  # 定時任務
-    - cron: '*/5 * * * *'  # 每5分鐘運行一次
+    - cron: '0 0/3 * * *'  # 每3小時行一次
   workflow_dispatch:  # 手動觸發
 
 jobs:
