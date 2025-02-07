@@ -1,33 +1,27 @@
-name: My Workflow
+name: Run YT2m Workflow
 
 on:
-  push:  # 在推送代碼時觸發
-  schedule:  # 定時任務
-    - cron: '0 0/3 * * *'  # 每3小時行一次
+  push:  # 代碼推送時觸發
+  schedule:  
+    - cron: '0 */3 * * *'  # 每 3 小時運行一次
   workflow_dispatch:  # 手動觸發
 
 jobs:
-  example-job:
-    runs-on: ubuntu-latest  # 使用最新的Ubuntu運行器
+  run-script:
+    runs-on: ubuntu-latest  # 使用最新的 Ubuntu 運行器
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3  # 使用最新版的 actions/checkout
+      - name: 🛎️ 檢出倉庫
+        uses: actions/checkout@v3  # 拉取最新代碼
 
-    - name: List files in root directory
-      run: ls -R /home/runner/work/YT2m/  # 列出 YT2m 目錄中的文件
+      - name: 📂 顯示倉庫文件結構
+        run: ls -R  # 確保檔案完整
 
-    - name: Make go.sh executable
-      run: chmod +x ./go.sh  # 設置腳本為可執行
+      - name: ✅ 設置 go.sh 可執行
+        run: chmod +x go.sh
 
-    - name: Run go.sh
-      run: ./go.sh  # 執行腳本
+      - name: 🚀 運行 go.sh
+        run: ./go.sh
 
-    - name: Run go.sh and capture logs
-      run: ./go.sh | tee go_log.txt
-      
-    - name: Make go.sh executable
-      run: chmod +x go.sh && ls -lh go.sh  # 確保 go.sh 有執行權限
-
-    - name: List generated files
-      run: ls -lh output/
+      - name: 📂 顯示 output 內容
+        run: ls -lh output/
