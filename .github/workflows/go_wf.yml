@@ -1,9 +1,10 @@
-name: My Workflow
+name: My Workflow 1
 
 on:
   push:  # 在推送代碼時觸發
   schedule:  # 定時任務
     - cron: '*/5 * * * *'  # 每5分鐘運行一次
+  workflow_dispatch:  # 手動觸發
 
 jobs:
   example-job:
