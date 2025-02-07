@@ -15,6 +15,11 @@ with open(yt_info_path, "r", encoding="utf-8") as f:
 # 過濾出 YouTube 直播連結
 yt_links = [line.strip() for line in lines if line.startswith("http")]
 
+result = subprocess.run(
+    ["yt-dlp", "-g", "--live-from-start", url],
+    capture_output=True, text=True, timeout=30
+)
+
 # 解析每個直播連結
 for index, url in enumerate(yt_links, start=1):
     try:
