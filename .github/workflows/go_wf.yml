@@ -20,8 +20,27 @@ jobs:
       - name: ✅ 設置 go.sh 可執行
         run: chmod +x go.sh
 
-      - name: 🚀 運行 go.sh
-        run: ./go.sh
+      - name: 🌍 顯示環境信息
+        run: uname -a
 
-      - name: 📂 顯示 output 內容
+      - name: 💾 安裝依賴項
+        run: sudo apt-get update && sudo apt-get install -y <依賴項名稱>  # 替換為實際依賴項名稱
+
+      - name: 🚀 運行 go.sh 並顯示詳細輸出
+        run: |
+          set -e
+          ./go.sh
+        continue-on-error: true
+
+      - name: 📂 顯示 output 目錄內容
         run: ls -lh output/
+
+      - name: 🔄 提交並推送變更
+        run: |
+          git config --global user.name "your-username"
+          git config --global user.email "your-email@example.com"
+          git add output/
+          git commit -m "自動生成的文件"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
