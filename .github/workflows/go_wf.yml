@@ -1,4 +1,4 @@
-name: Update Files
+name: Auto Update M3U8
 
 on:
   schedule:
@@ -6,34 +6,32 @@ on:
   workflow_dispatch:  # 允許手動觸發
 
 jobs:
-  update_m3u8:
+  update-m3u8:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🛎️ 檢出代碼
+      - name: 檢出儲存庫
         uses: actions/checkout@v4
 
-      - name: 🛠️ 設置 Python 環境
+      - name: 設定 Python 環境
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
 
-      - name: 📦 安裝依賴
-        run: pip install -r requirements.txt
+      - name: 安裝依賴
+        run: |
+          pip install -r requirements.txt
 
-      - name: 🚀 運行 yt_m.py 解析 YouTube 直播 M3U8
+      - name: 執行 yt_m.py
         run: bash go.sh
 
-      - name: 📤 提交變更
+      - name: 設定 Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 提交變更
+        run: |
           git add output/
-          if git diff --cached --quiet; then
-            echo "⚠️ 無變更，跳過提交"
-          else
-            git commit -m "🔄 更新 M3U8 清單"
-            git push
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git commit -m "🔄 更新 M3U8 清單" || echo "⚠️ 無變更，跳過提交"
+          git push
