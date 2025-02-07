@@ -27,7 +27,7 @@ jobs:
       - name: Run go.sh
         run: |
           chmod +x ./go.sh
-          ./autorun.sh
+          ./go.sh
 
       - name: Add changes
         run: git add -A
