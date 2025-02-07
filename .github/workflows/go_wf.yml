@@ -1,46 +1,37 @@
-name: Run YT2m Workflow
+name: Update M3U8 Files
 
 on:
-  push:  # 代碼推送時觸發
-  schedule:  
-    - cron: '0 */3 * * *'  # 每 3 小時運行一次
-  workflow_dispatch:  # 手動觸發
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 * * * *'  # 每小時運行一次
+  workflow_dispatch:  # 允許手動觸發
 
 jobs:
-  run-script:
-    runs-on: ubuntu-latest  # 使用最新的 Ubuntu 運行器
+  update-m3u8:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: 🛎️ 檢出倉庫
-        uses: actions/checkout@v3  # 拉取最新代碼
+      - name: 📥 檢出程式碼
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: 📂 顯示倉庫文件結構
-        run: ls -R  # 確保檔案完整
-
-      - name: ✅ 設置 go.sh 可執行
-        run: chmod +x go.sh
-
-      - name: 🌍 顯示環境信息
-        run: uname -a
-
-      - name: 💾 安裝依賴項
-        run: sudo apt-get update && sudo apt-get install -y <依賴項名稱>  # 替換為實際依賴項名稱
-
-      - name: 🚀 運行 go.sh 並顯示詳細輸出
+      - name: 🛠️ 設定 Python 環境
         run: |
-          set -e
-          ./go.sh
-        continue-on-error: true
+          python3 -m pip install --upgrade pip yt-dlp
 
-      - name: 📂 顯示 output 目錄內容
-        run: ls -lh output/
-
-      - name: 🔄 提交並推送變更
+      - name: 🚀 生成 M3U8 檔案
         run: |
-          git config --global user.name "your-username"
-          git config --global user.email "your-email@example.com"
-          git add output/
-          git commit -m "自動生成的文件"
+          bash go.sh  # 執行 go.sh，這會運行 yt_m.py 生成 output/*.m3u8
+
+      - name: 📝 提交並推送變更
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/*.m3u8
+          git commit -m "🔄 更新 M3U8 檔案 $(date '+%Y-%m-%d %H:%M:%S')" || exit 0
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
