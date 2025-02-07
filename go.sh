@@ -10,6 +10,4 @@ python3 -m pip install requests
 cd $(dirname $0)/scripts/
 
 # 運行 yt_m3ugrabber.py 腳本
-python3 yt_m3ugrabber.py
-
-echo "m3u8 grabbed and saved to parent directory"
+python3 yt_m.py
