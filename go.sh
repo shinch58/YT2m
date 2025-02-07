@@ -7,4 +7,4 @@ sudo apt-get install -y python3-pip
 pip3 install requests
 
 # 執行 Python 腳本
-python3 /path/to/your/script.py
+python3 scripts/yt_m.py
