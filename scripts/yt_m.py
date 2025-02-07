@@ -42,3 +42,6 @@ for index, url in enumerate(yt_links, start=1):
 
     except Exception as e:
         print(f"❌  解析 {url} 失敗: {e}")
+
+- name: 測試 yt-dlp 解析
+  run: yt-dlp -g "https://www.youtube.com/watch?v=ylYJSBUgaMA" || echo "❌ yt-dlp 無法解析"
