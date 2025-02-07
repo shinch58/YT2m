@@ -1,14 +1,17 @@
 name: My Workflow
 
-on: [push]  # 指定触发事件，这里是每次代码推送时触发
+on:
+  push:  # 在推送代碼時觸發
+  schedule:  # 定時任務
+    - cron: '*/5 * * * *'  # 每5分鐘運行一次
 
 jobs:
   example-job:
-    runs-on: ubuntu-latest  # 使用最新的Ubuntu运行器
+    runs-on: ubuntu-latest  # 使用最新的Ubuntu運行器
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3  # 使用最新版的 actions/checkout
 
     - name: Run go.sh
-      run: ./go.sh  # 运行脚本
+      run: sh ./go.sh  # 執行腳本
