@@ -12,6 +12,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: List files
+        run: ls -la
+
       - name: Run autorun.sh
         run: |
           chmod +x ./autorun.sh
