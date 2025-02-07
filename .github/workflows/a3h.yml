@@ -22,7 +22,7 @@ jobs:
       - name: Run autorun.sh
         run: |
           chmod +x ./autorun.sh
-          ./autorun.sh
+          ./YT2m/autorun.sh
 
       - name: Add changes
         run: git add -A
