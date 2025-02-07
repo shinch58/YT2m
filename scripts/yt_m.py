@@ -37,6 +37,7 @@ def get_m3u8(url):
         print(f"📡 嘗試從 {url} 獲取 M3U8 連結...")
         result = subprocess.run(["yt-dlp", "-g", url], capture_output=True, text=True, timeout=30)
         print(f"📝 yt-dlp 輸出: {result.stdout}")
+        print(f"⚠️ yt-dlp 錯誤輸出: {result.stderr}")
         if "m3u8" in result.stdout:
             return result.stdout.strip()
         else:
