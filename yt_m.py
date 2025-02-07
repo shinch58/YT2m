@@ -57,10 +57,4 @@ def main():
 
         content = f"#EXTM3U\n#EXTINF:-1 ,{channel_name}\n{m3u8_url}"
 
-        with open(filename, "w", encoding="utf-8") as output_file:
-            output_file.write(content)
-
-        print(f"✅ 生成 {filename}")
-
-if __name__ == "__main__":
-    main()
+        with open(filename, "w", encoding="
