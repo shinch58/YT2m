@@ -1,4 +1,4 @@
-name: My Workflow 1
+name: My Workflow
 
 on:
   push:  # 在推送代碼時觸發
@@ -13,6 +13,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3  # 使用最新版的 actions/checkout
+
+    - name: List files in directory
+      run: ls -R /home/runner/work/YT2m/scripts/  # 列出目錄中的文件
 
     - name: Make go.sh executable
       run: chmod +x ./go.sh  # 設置腳本為可執行
