@@ -1,39 +1,35 @@
-name: My Workflow
+name: 自動更新 M3U8
 
 on:
-  push:
   schedule:
-    - cron: '0 */3 * * *'  # 每 3 小時執行一次
-  workflow_dispatch:
+    - cron: "0 * * * *"  # 每小時運行一次
+  workflow_dispatch:  # 允許手動觸發
 
 jobs:
-  run-script:
+  update-m3u8:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: 檢出儲存庫
+        uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: 設定 Python 環境
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: 安裝依賴
+        run: pip install requests beautifulsoup4
+
+      - name: 執行腳本
+        run: bash go.sh
+
+      - name: 提交變更
         run: |
-          python3 -m pip install --upgrade yt-dlp
-          sudo apt-get install ffmpeg
-
-      - name: Save YouTube Cookies
-        run: echo "${{ secrets.YOUTUBE_COOKIES }}" > cookies.txt
-
-      - name: Test yt-dlp with Cookies
-        run: yt-dlp -g --cookies cookies.txt "https://www.youtube.com/watch?v=ylYJSBUgaMA" || echo "❌ yt-dlp 無法解析"
-
-      - name: Run yt_m.py
-        run: python3 scripts/yt_m.py
-
-      - name: Commit and Push output files
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add output/
-          git commit -m "Auto-update M3U8 files" || echo "No changes to commit"
-          git push
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/*.m3u8
+          git commit -m "🔄 更新 M3U8 文件 $(date +'%Y-%m-%d %H:%M:%S')" || echo "⚠️ 無變更，跳過提交"
+          git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
