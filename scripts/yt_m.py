@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 import os
-import requests
 import re
 import time
+import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 
 YT_INFO_FILE = "yt_info.txt"
 OUTPUT_DIR = "output/"
@@ -11,19 +15,29 @@ M3U8_NOT_FOUND = "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/mo
 # 確保輸出目錄存在
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-def grab_m3u8(url):
-    """從 YouTube 頁面 HTML 解析 .m3u8 連結"""
-    try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        }
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
+# 設定 Selenium 瀏覽器
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # 無頭模式
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
 
-        match = re.search(r'(https?://[^"]+\.m3u8)', response.text)
+def grab_m3u8(url):
+    """使用 Selenium 解析 YouTube 直播頁面的 .m3u8 連結"""
+    try:
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        driver.get(url)
+        time.sleep(5)  # 等待 JavaScript 加載
+
+        # 取得頁面 HTML
+        page_source = driver.page_source
+        driver.quit()
+
+        # 用正則表達式尋找 .m3u8 連結
+        match = re.search(r'(https?://[^"]+\.m3u8)', page_source)
         if match:
             return match.group(1)
-    except requests.RequestException as e:
+    except Exception as e:
         print(f"❌ 解析失敗: {url}, 錯誤: {e}")
     return M3U8_NOT_FOUND
 
