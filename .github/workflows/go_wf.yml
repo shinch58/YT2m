@@ -1,35 +1,38 @@
-name: 自動更新 M3U8
+name: 解析 YouTube 直播 M3U8
 
 on:
   schedule:
-    - cron: "0 * * * *"  # 每小時運行一次
+    - cron: '0 */3 * * *'  # 每 3 小時運行一次
   workflow_dispatch:  # 允許手動觸發
 
 jobs:
-  update-m3u8:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: 檢出儲存庫
         uses: actions/checkout@v4
 
-      - name: 設定 Python 環境
+      - name: 設置 Python 環境
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
       - name: 安裝依賴
-        run: pip install requests beautifulsoup4
+        run: pip install -r requirements.txt
 
-      - name: 執行腳本
+      - name: 執行 yt_m.py 解析 YouTube 直播
         run: bash go.sh
 
-      - name: 提交變更
+      - name: 設定 Git 用戶資訊
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/*.m3u8
-          git commit -m "🔄 更新 M3U8 文件 $(date +'%Y-%m-%d %H:%M:%S')" || echo "⚠️ 無變更，跳過提交"
+
+      - name: 提交並推送變更
+        run: |
+          git add output/
+          git commit -m "📡 更新 M3U8 直播列表" || echo "⚠️ 無變更，跳過提交"
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
