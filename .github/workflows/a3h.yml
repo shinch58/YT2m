@@ -3,21 +3,20 @@ name: Auto Run Script
 on:
   schedule:
     - cron: '*/5 * * * *'
-  
   pull_request:
     branches:
       - main
-
   workflow_dispatch:
 
 jobs:
-  build:
-    run-script:
+  run-script:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-          - name: config
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure git
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
@@ -28,13 +27,19 @@ jobs:
           chmod +x autorun.sh
           ./autorun.sh
 
-      - name: git add
-        run: |
-          git add -A
-          ls -la
+      - name: List files
+        run: ls -la
 
-      - name: commit & push
+      - name: Add changes
+        run: git add -A
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff-index --quiet HEAD --; then echo "::set-output name=result::no"; else echo "::set-output name=result::yes"; fi
+
+      - name: Commit & push
+        if: steps.changes.outputs.result == 'yes'
         run: |
           git commit -m "links are updated"
           git push -f
-
