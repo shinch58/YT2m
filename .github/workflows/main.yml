@@ -13,4 +13,4 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Run go.sh
-      run: ./go.sh
+      run: sh ./go.sh
