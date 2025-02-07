@@ -1,26 +1,52 @@
-name: my wf
+name: M3U generator
 
+# 控制何時運行此動作
 on:
   schedule:
-    - cron: "0 */3 * * *"
+    # 每3小時運行一次
+    - cron: '0 0/3 * * *'
+
+  # 允許從Actions標籤手動運行此工作流
   workflow_dispatch:
 
+# 作業
 jobs:
-  update_m3u8:
+  # 這個工作流包含一個名為"build"的作業
+  build:
+    # 作業運行的類型
     runs-on: ubuntu-latest
+
+    # 步驟
     steps:
-      - name: 檢出程式碼
-        uses: actions/checkout@v4
+      # 檢出你的倉庫以便於工作流可以訪問
+      - uses: actions/checkout@v2
 
-      - name: 設定 Python 環境
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.x"
+      # 配置Git設定
+      - name: Set up Git
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
 
-      - name: 安裝依賴
-        run: pip install requests
+      # 安裝必要的工具
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yt-dlp
+          sudo apt-get install -y python3-pip
+          pip3 install requests
 
-      - name: 執行 yt_m.py
-        run: bash go.sh
+      # 設置執行許可權並運行go.sh
+      - name: Run go.sh
+        run: |
+          chmod +x go.sh
+          ./go.sh
+
+      # 添加並提交變更
+      - name: Commit & Push
+        run: |
+          git add -A
+          git commit -m "Automated update by GitHub Actions"
+          git push
+            
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
