@@ -21,7 +21,12 @@ jobs:
       - name: 安裝依賴
         run: |
           pip install -r requirements.txt
-
+          
+      - name: 安裝 Chrome 及 WebDriver
+        run: |
+          sudo apt update
+          sudo apt install -y chromium-chromedriver
+      
       - name: 執行 yt_m.py
         run: bash go.sh
 
