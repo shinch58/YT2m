@@ -28,3 +28,6 @@ jobs:
       
     - name: Make go.sh executable
       run: chmod +x go.sh && ls -lh go.sh  # 確保 go.sh 有執行權限
+
+    - name: List generated files
+      run: ls -lh output/
