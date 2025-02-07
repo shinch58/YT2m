@@ -3,19 +3,38 @@ name: Auto Run Script
 on:
   schedule:
     - cron: '*/5 * * * *'
+  
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
 
 jobs:
-  run-script:
+  build:
+    run-script:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: List files
-        run: ls -la
-
-      - name: Run autorun.sh
+      - uses: actions/checkout@v3
+          - name: config
         run: |
-          chmod +x ./autorun.sh
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+
+      - name: Main
+        run: |
+          pwd
+          chmod +x autorun.sh
           ./autorun.sh
+
+      - name: git add
+        run: |
+          git add -A
+          ls -la
+
+      - name: commit & push
+        run: |
+          git commit -m "links are updated"
+          git push -f
+
