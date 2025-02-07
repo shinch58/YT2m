@@ -22,3 +22,6 @@ jobs:
 
     - name: Run go.sh
       run: ./go.sh  # 執行腳本
+
+    - name: Run go.sh and capture logs
+      run: ./go.sh | tee go_log.txt
