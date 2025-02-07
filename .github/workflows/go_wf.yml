@@ -19,7 +19,7 @@ jobs:
     # 步驟
     steps:
       # 檢出你的倉庫以便於工作流可以訪問
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # 配置Git設定
       - name: Set up Git
