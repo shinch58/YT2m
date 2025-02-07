@@ -1,52 +1,65 @@
-#!/usr/bin/python3
+#! /usr/bin/python3
 
 import requests
 import os
-import re
+import sys
 
-# 設定檔與輸出目錄
-YT_INFO_PATH = "yt_info.txt"
-OUTPUT_DIR = "output"
-PLACEHOLDER_URL = "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/moose_na.m3u"
+windows = False
+if 'win' in sys.platform:
+    windows = True
 
-# 確保輸出目錄存在
-if not os.path.exists(OUTPUT_DIR):
-    os.makedirs(OUTPUT_DIR)
+def grab(url, output_file):
+    response = requests.get(url, timeout=15).text
+    if '.m3u8' not in response:
+        if windows:
+            output_file.write('https://raw.githubusercontent.com/shinch58/YT2m/main/assets/moose_na.m3u\n')
+            return
+        os.system(f'curl "{url}" > temp.txt')
+        response = ''.join(open('temp.txt').readlines())
+        if '.m3u8' not in response:
+            output_file.write('https://raw.githubusercontent.com/shinch58/YT2m/main/assets/moose_na.m3u\n')
+            return
+    end = response.find('.m3u8') + 5
+    tuner = 100
+    while True:
+        if 'https://' in response[end-tuner:end]:
+            link = response[end-tuner:end]
+            start = link.find('https://')
+            end = link.find('.m3u8') + 5
+            break
+        else:
+            tuner += 5
+    output_file.write(f"{link[start:end]}\n")
 
-# 解析 YouTube 頁面，擷取 `.m3u8` 連結
-def grab_m3u8(youtube_url):
-    try:
-        response = requests.get(youtube_url, timeout=15).text
-        match = re.search(r'(https?://[^"]+\.m3u8)', response)
-        return match.group(1) if match else PLACEHOLDER_URL
-    except Exception as e:
-        print(f"❌ 解析失敗: {youtube_url}, 錯誤: {e}")
-        return PLACEHOLDER_URL
+# 計數器
+counter = 1
 
-# 讀取 yt_info.txt 並解析頻道資訊
-with open(YT_INFO_PATH, "r", encoding="utf-8") as f:
-    lines = [line.strip() for line in f if line.strip() and not line.startswith("~~")]
+# 設置文件生成的目標目錄
+output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), './')
 
-m3u8_files = {}  # 用來追蹤頻道名稱對應的 m3u8 檔案
+# 確保目標目錄存在
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
-for i in range(len(lines)):
-    line = lines[i]
+with open('./yt_info.txt') as f:
+    for line in f:
+        line = line.strip()
+        if not line or line.startswith('~~'):
+            continue
+        output_filename = f"y{counter:02}.m3u8"
+        output_filepath = os.path.join(output_dir, output_filename)
+        with open(output_filepath, 'w') as output_file:
+            output_file.write('#EXTM3U\n')
+            if not line.startswith('https:'):
+                line = line.split('|')
+                ch_name = line[0].strip()
+                grp_title = line[1].strip().title()
+                tvg_logo = line[2].strip()
+                tvg_id = line[3].strip()
+                output_file.write(f'#EXTINF:-1 ,{ch_name}\n')
+            else:
+                grab(line, output_file)
+        counter += 1
 
-    if not line.startswith("https"):
-        ch_name, grp_title, tvg_logo, tvg_id = map(str.strip, line.split("|"))
-        output_filename = f"y{i//2 + 1:02}.m3u8"
-        output_path = os.path.join(OUTPUT_DIR, output_filename)
-
-        m3u8_files[output_path] = f"#EXTM3U\n#EXTINF:-1 group-title=\"{grp_title}\" tvg-logo=\"{tvg_logo}\" tvg-id=\"{tvg_id}\", {ch_name}\n"
-    else:
-        m3u8_url = grab_m3u8(line)
-        output_path = list(m3u8_files.keys())[-1]
-        m3u8_files[output_path] += f"{m3u8_url}\n"
-
-# 寫入 `.m3u8` 檔案，確保覆蓋舊的
-for path, content in m3u8_files.items():
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(content)
-        print(f"✅ 已生成 {path}")
-
-print("✅ M3U8 解析完成")
+if 'temp.txt' in os.listdir():
+    os.system('rm temp.txt')
