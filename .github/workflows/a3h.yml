@@ -21,14 +21,13 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
 
-      - name: Main
-        run: |
-          pwd
-          chmod +x autorun.sh
-          ./autorun.sh
-
       - name: List files
         run: ls -la
+
+      - name: Run autorun.sh
+        run: |
+          chmod +x ./autorun.sh
+          ./autorun.sh
 
       - name: Add changes
         run: git add -A
