@@ -19,10 +19,10 @@ jobs:
       - name: List files
         run: ls -la
 
-      - name: Run autorun.sh
+      - name: Run go.sh
         run: |
-          chmod +x ./autorun.sh
-          ./YT2m/autorun.sh
+          chmod +x ./go.sh
+          ./go.sh
 
       - name: Add changes
         run: git add -A
