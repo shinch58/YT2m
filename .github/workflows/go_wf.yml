@@ -19,8 +19,11 @@ jobs:
           python3 -m pip install --upgrade yt-dlp
           sudo apt-get install ffmpeg
 
-      - name: Test yt-dlp
-        run: yt-dlp -g "https://www.youtube.com/watch?v=ylYJSBUgaMA" || echo "❌ yt-dlp 無法解析"
+      - name: Save YouTube Cookies
+        run: echo "${{ secrets.YOUTUBE_COOKIES }}" > cookies.txt
+
+      - name: Test yt-dlp with Cookies
+        run: yt-dlp -g --cookies cookies.txt "https://www.youtube.com/watch?v=ylYJSBUgaMA" || echo "❌ yt-dlp 無法解析"
 
       - name: Run yt_m.py
         run: python3 scripts/yt_m.py
