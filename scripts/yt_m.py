@@ -4,7 +4,7 @@ import subprocess
 # 設定檔案路徑
 yt_info_path = "yt_info.txt"
 output_dir = "output"
-cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
+cookies_path = os.path.join(os.getcwd(), "cookies.txt")
 
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
