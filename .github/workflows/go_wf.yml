@@ -35,5 +35,5 @@ jobs:
       - name: Commit & Push
         run: |
           git add -A
-          git commit -m "Automated update by GitHub Actions"
+          git diff --cached --quiet || git commit -m "Automated update by GitHub Actions"
           git push
