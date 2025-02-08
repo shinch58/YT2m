@@ -75,4 +75,7 @@ def main():
         with open(filename, "w", encoding="utf-8") as output_file:
             output_file.write(content)
 
-        print(f"✅
+        print(f"✅ 生成 {filename}")
+
+if __name__ == "__main__":
+    main()
