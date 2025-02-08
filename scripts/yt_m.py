@@ -1,17 +1,17 @@
 import os
 import subprocess
-
+yt-dlp --force-generic-extractor --cookies cookies.txt -g "https://www.youtube.com/watch?v=ylYJSBUgaMA"
 # 設定檔案路徑
 yt_info_path = "yt_info.txt"
 output_dir = "output"
-cookies_path = "cookies.txt"  # 與 go.sh 同目錄
+cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
 
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
 
 def grab(youtube_url):
     """使用 yt-dlp 解析 M3U8 連結"""
-    yt_dlp_cmd = f"yt-dlp --cookies {cookies_path} --sleep-requests 2 --limit-rate 500K -g {youtube_url}"
+    yt_dlp_cmd = f"yt-dlp --force-generic-extractor --cookies {cookies_path} --sleep-requests 2 --limit-rate 500K -g {youtube_url}"
     try:
         result = subprocess.run(yt_dlp_cmd, shell=True, capture_output=True, text=True, check=True)
         m3u8_url = result.stdout.strip()
