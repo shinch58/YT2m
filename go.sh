@@ -11,19 +11,12 @@ if [[ -z "$YT_COOKIES" ]]; then
 fi
 
 # 解碼 YT_COOKIES 並生成 cookies.txt
-echo "$YT_COOKIES" | tr -d '\n' | base64 --decode > cookies.txt
+echo "$YT_COOKIES" | base64 --decode | tr -d '\r' > cookies.txt
 echo "✅ cookies.txt 生成完成"
-
-# 確保文件有效（可選，調試用）
-file cookies.txt
-head -n 5 cookies.txt
 
 # 執行 yt_m.py 解析 M3U8
 echo "🔍 開始執行 yt_m.py"
 python3 scripts/yt_m.py
-
-mkdir -p output
-echo "$YT_COOKIES" | base64 --decode | tr -d '\r' > output/cookies.txt
 
 # 刪除 cookies.txt，確保隱私安全
 rm -f cookies.txt
