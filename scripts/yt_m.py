@@ -9,6 +9,10 @@ cookies_path = os.path.join(os.getcwd(), "cookies.txt")
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
 
+#檢查cookie.txt
+if not os.path.exists(cookies_path):
+    print(f"❌ 錯誤: 找不到 cookies.txt ({cookies_path})")
+
 def grab(youtube_url):
     """使用 yt-dlp 解析 M3U8 連結"""
     yt_dlp_cmd = f"yt-dlp --force-generic-extractor --cookies {cookies_path} --sleep-requests 2 --limit-rate 500K -g {youtube_url}"
