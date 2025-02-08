@@ -1,41 +1,40 @@
-name: M3U generator
+name: Run yt_m.py every 3 hours
 
 on:
   schedule:
-    - cron: "0 */3 * * *"
-  workflow_dispatch:
+    - cron: "0 */3 * * *"  # 每 3 小時執行一次
+  workflow_dispatch:  # 允許手動觸發
 
 jobs:
-  build:
+  run_script:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          persist-credentials: true  # 確保 Actions 可以 push 更新
+          python-version: '3.x'
 
-      - name: Set up Git
+      - name: Install Dependencies
         run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y yt-dlp python3-pip
+          sudo apt update
+          sudo apt install -y yt-dlp python3-pip
           pip3 install requests
 
       - name: Run go.sh
+        env:
+          YT_COOKIES: ${{ secrets.YT_COOKIES }}  # 使用 GitHub Secrets
         run: |
           chmod +x go.sh
           ./go.sh
 
-      - name: Commit & Push changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit and Push Output Files
         run: |
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/shinch58/YT2m.git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add output/
-          git commit -m "Automated update by GitHub Actions" --allow-empty
-          git push origin main
+          git commit -m "🔄 更新 M3U8 清單" || echo "No changes to commit"
+          git push
