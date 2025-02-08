@@ -4,18 +4,13 @@ import subprocess
 # 設定檔案路徑
 yt_info_path = "yt_info.txt"
 output_dir = "output"
-cookies_path = os.path.join(os.getcwd(), "cookies.txt")
 
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
 
-#檢查cookie.txt
-if not os.path.exists(cookies_path):
-    print(f"❌ 錯誤: 找不到 cookies.txt ({cookies_path})")
-
 def grab(youtube_url):
     """使用 yt-dlp 解析 M3U8 連結"""
-    yt_dlp_cmd = f"yt-dlp --geo-bypass --cookies cookies.txt --sleep-requests 1 --limit-rate 500k --retries 5 --fragment-retries 10 --no-warnings --quiet --no-check-certificate --no-playlist -g {youtube_url}"
+    yt_dlp_cmd = f"yt-dlp "bestaudio[ext=m4a]" --geo-bypass --cookies cookies.txt --sleep-requests 1 --limit-rate 1M --retries 5 --fragment-retries 10 --no-warnings --quiet --no-check-certificate --no-playlist -g {youtube_url}"
     try:
         result = subprocess.run(yt_dlp_cmd, shell=True, capture_output=True, text=True, check=True)
         m3u8_url = result.stdout.strip()
