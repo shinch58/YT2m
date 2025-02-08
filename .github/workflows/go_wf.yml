@@ -2,8 +2,8 @@ name: M3U generator
 
 on:
   schedule:
-    - cron: '0 */3 * * *'  # 每 3 小時運行一次
-  workflow_dispatch:  # 可手動觸發
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,7 +11,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true  # 確保 Actions 可以 push 更新
 
       - name: Set up Git
         run: |
@@ -24,14 +26,16 @@ jobs:
           sudo apt-get install -y yt-dlp python3-pip
           pip3 install requests
 
-      - name: Run yt_m.py
-        env:
-          YT_COOKIES: ${{ secrets.YT_COOKIES }}
+      - name: Run go.sh
         run: |
-          python3 scripts/yt_m.py
+          chmod +x go.sh
+          ./go.sh
 
       - name: Commit & Push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git add -A
-          git commit -m "Automated update by GitHub Actions" || echo "No changes to commit"
-          git push
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/shinch58/YT2m.git
+          git add output/
+          git commit -m "Automated update by GitHub Actions" --allow-empty
+          git push origin main
