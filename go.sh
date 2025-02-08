@@ -1,32 +1,44 @@
 #!/bin/bash
 
+set -e  # 遇到錯誤立即停止腳本
+
 echo "🚀 開始執行 go.sh"
 
-# 生成 cookies.txt
-if [ -z "$YT_COOKIES" ]; then
+# 檢查 YT_COOKIES 是否存在
+if [[ -z "$YT_COOKIES" ]]; then
     echo "❌ 環境變數 YT_COOKIES 未設置"
     exit 1
 fi
 
-echo "$YT_COOKIES" | base64 --decode > cookies.txt
+# 解碼 YT_COOKIES 並生成 cookies.txt
+echo "$YT_COOKIES" | tr -d '\n' | base64 --decode > cookies.txt
 echo "✅ cookies.txt 生成完成"
 
-# 安裝依賴（確保 `yt-dlp` 和 `requests` 可用）
-echo "📦 安裝 yt-dlp 和 pip3"
-sudo apt update
-sudo apt install -y yt-dlp python3-pip
-pip3 install --user requests
+# 確保文件有效（可選，調試用）
+file cookies.txt
+head -n 5 cookies.txt
 
 # 執行 yt_m.py 解析 M3U8
-echo "🐍 執行 scripts/yt_m.py"
+echo "🔍 開始執行 yt_m.py"
 python3 scripts/yt_m.py
 
-#檢查cookie 
-echo "$YT_COOKIE" | base64 --decode > cookies.txt
-cat cookies.txt
-
-# **刪除 cookies.txt**
+# 刪除 cookies.txt，確保隱私安全
 rm -f cookies.txt
 echo "✅ cookies.txt 已刪除"
+
+# 確保 Git 設置正確
+git config --global user.name "github-actions"
+git config --global user.email "github-actions@github.com"
+
+# 檢查 output 目錄是否有變更
+if [[ -n "$(git status --porcelain output/)" ]]; then
+    echo "📂 偵測到 output 變更，開始提交..."
+    git add output/
+    git commit -m "🔄 更新 M3U8 文件 $(date '+%Y-%m-%d %H:%M:%S')"
+    git push origin main
+    echo "✅ 變更已提交至 GitHub"
+else
+    echo "ℹ️ output 目錄沒有變更，不進行提交"
+fi
 
 echo "✅ go.sh 執行完成"
