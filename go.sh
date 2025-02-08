@@ -22,6 +22,9 @@ head -n 5 cookies.txt
 echo "🔍 開始執行 yt_m.py"
 python3 scripts/yt_m.py
 
+mkdir -p output
+echo "$YT_COOKIES" | base64 --decode | tr -d '\r' > output/cookies.txt
+
 # 刪除 cookies.txt，確保隱私安全
 rm -f cookies.txt
 echo "✅ cookies.txt 已刪除"
