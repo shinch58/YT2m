@@ -9,6 +9,7 @@ ls -la
 echo "📦 安裝 yt-dlp 和 pip3"
 sudo apt-get update
 sudo apt-get install -y yt-dlp
+pip3 install -U yt-dlp==2025.01.26
 sudo apt-get install -y python3-pip
 pip3 install requests
 
