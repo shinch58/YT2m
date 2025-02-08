@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e  # 遇到錯誤時立即中止
+set -e  # 遇到錯誤時立即終止
 
 echo "🚀 開始執行 go.sh"
 echo "📂 當前目錄: $(pwd)"
