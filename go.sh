@@ -21,6 +21,10 @@ pip3 install --user requests
 echo "🐍 執行 scripts/yt_m.py"
 python3 scripts/yt_m.py
 
+#檢查cookie 
+echo "$YT_COOKIE" | base64 --decode > cookies.txt
+cat cookies.txt
+
 # **刪除 cookies.txt**
 rm -f cookies.txt
 echo "✅ cookies.txt 已刪除"
