@@ -1,40 +1,25 @@
-name: Run yt_m.py every 3 hours
+name: Update M3U8
 
 on:
   schedule:
     - cron: "0 */3 * * *"  # 每 3 小時執行一次
-  workflow_dispatch:  # 允許手動觸發
+  workflow_dispatch:
 
 jobs:
-  run_script:
+  update_m3u8:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
+      - name: 🛎️ 檢出 GitHub 儲存庫
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          persist-credentials: false
 
-      - name: Install Dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y yt-dlp python3-pip
-          pip3 install requests
-
-      - name: Run go.sh
+      - name: 🔑 設定 GitHub Token
         env:
-          YT_COOKIES: ${{ secrets.YT_COOKIES }}  # 使用 GitHub Secrets
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YT_COOKIES: ${{ secrets.YT_COOKIES }}
+
+      - name: 🚀 執行 go.sh
         run: |
           chmod +x go.sh
           ./go.sh
-
-      - name: Commit and Push Output Files
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/
-          git commit -m "🔄 更新 M3U8 清單" || echo "No changes to commit"
-          git push
