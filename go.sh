@@ -2,6 +2,8 @@
 
 set -e  # 遇到錯誤立即停止腳本
 
+pip install -U yt-dlp
+
 echo "🚀 開始執行 go.sh"
 
 # 檢查 YT_COOKIES 是否存在
