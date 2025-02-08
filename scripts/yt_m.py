@@ -1,81 +1,62 @@
 import os
 import subprocess
-import requests
 
-# 設定目錄與檔案
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # `scripts/` 上一層
-INFO_FILE = os.path.join(BASE_DIR, "yt_info.txt")  # YouTube 直播清單
-OUTPUT_DIR = os.path.join(BASE_DIR, "output")  # M3U8 輸出目錄
-FALLBACK_M3U8 = "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/moose_na.m3u"  # 預設連結
+# 預設 M3U8 連結（解析失敗時使用）
+FALLBACK_M3U8 = "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/moose_na.m3u"
 
-# 讀取 GitHub Actions `YT_COOKIES`
-YT_COOKIES = os.getenv("YT_COOKIES", "")
+# 讀取頻道資訊檔案
+INFO_FILE = os.path.join(os.path.dirname(__file__), "../yt_info.txt")
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "../output")
 
-# 確保 output/ 目錄存在
+# 確保 output 目錄存在
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-def read_yt_info():
-    """解析 yt_info.txt，獲取頻道名稱與 YouTube 直播 URL"""
-    if not os.path.exists(INFO_FILE):
-        print(f"❌ 錯誤: 找不到 {INFO_FILE}")
-        return []
-
-    channels = []
-    with open(INFO_FILE, "r", encoding="utf-8") as file:
-        lines = [line.strip() for line in file if line.strip()]
-    
-    i = 2  # 跳過前兩行
-    while i < len(lines) - 1:
-        channel_info = lines[i]  # 頻道資訊
-        yt_url = lines[i + 1]    # YouTube 直播網址
-        if "|" in channel_info and "youtube.com" in yt_url:
-            channel_name = channel_info.split("|")[0].strip()  # 取得頻道名稱
-            channels.append((channel_name, yt_url))
-        i += 2  # 每次讀兩行
-
-    return channels
-
 def get_m3u8(url):
-    """使用 yt-dlp 取得 M3U8 連結"""
+    """使用 yt-dlp 解析 M3U8 連結，透過 stdin 傳遞 cookies"""
     try:
-        command = ["yt-dlp", "-g", url]
-        
-        # 如果有 cookies，則使用
-        if YT_COOKIES:
-            print("🍪 使用 YT_COOKIES 解析 YouTube 直播")
-            command.extend(["--cookies", "-"])
-            process = subprocess.run(command, input=YT_COOKIES, text=True, capture_output=True, timeout=30)
-        else:
-            process = subprocess.run(command, capture_output=True, text=True, timeout=30)
-
-        output = process.stdout.strip()
-        if "m3u8" in output:
-            return output
-        else:
-            print(f"⚠️ yt-dlp 解析失敗，改用預設 M3U8")
-            return FALLBACK_M3U8
-
+        result = subprocess.run(
+            ["yt-dlp", "--cookies-from-file", "-", "-g", url],
+            input=os.getenv("YT_COOKIES"),  # 直接讀取環境變數
+            capture_output=True, text=True, timeout=30
+        )
+        return result.stdout.strip() if "m3u8" in result.stdout else FALLBACK_M3U8
     except Exception as e:
-        print(f"⚠️ yt-dlp 執行錯誤: {e}")
-        return FALLBACK_M3U8  # 發生錯誤時使用預設連結
+        print(f"⚠️ yt-dlp 執行失敗，錯誤訊息: {e}")
+        return FALLBACK_M3U8
 
-def main():
-    channels = read_yt_info()
-    if not channels:
-        print("❌ 沒有有效的 YouTube 直播 URL，請確認 yt_info.txt 是否正確")
-        return
+# 解析 yt_info.txt
+with open(INFO_FILE, "r", encoding="utf-8") as f:
+    lines = f.readlines()
 
-    for idx, (channel_name, url) in enumerate(channels, start=1):
-        filename = os.path.join(OUTPUT_DIR, f"y{idx:02d}.m3u8")
-        m3u8_url = get_m3u8(url)
+channels = []
+current_channel = None
 
-        # 生成符合格式的 M3U8 文件內容
-        content = f"#EXTM3U\n#EXTINF:-1,{channel_name}\n{m3u8_url}"
+for line in lines:
+    line = line.strip()
+    if not line or line.startswith("~~"):
+        continue  # 跳過空行或註解
 
-        with open(filename, "w", encoding="utf-8") as output_file:
-            output_file.write(content)
+    if "|" in line:
+        if current_channel:
+            channels.append(current_channel)
+        current_channel = {"info": line, "url": None}
+    else:
+        if current_channel:
+            current_channel["url"] = line
+            channels.append(current_channel)
+            current_channel = None
 
-        print(f"✅ 生成 {filename}")
+# 生成 M3U8 檔案
+for index, channel in enumerate(channels):
+    if not channel["url"]:
+        continue  # 跳過沒有 URL 的頻道
 
-if __name__ == "__main__":
-    main()
+    m3u8_link = get_m3u8(channel["url"])
+    output_file = os.path.join(OUTPUT_DIR, f"y{index+1:02}.m3u8")
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write("#EXTM3U\n")
+        f.write(f"#EXTINF:-1,{channel['info'].split('|')[0].strip()}\n")
+        f.write(m3u8_link + "\n")
+
+    print(f"✅ 生成 {output_file}")
