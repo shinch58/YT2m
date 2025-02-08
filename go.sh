@@ -1,19 +1,16 @@
 #!/bin/sh
 
+# 確保腳本報錯時立即停止
+set -e
+
+echo "🚀 開始執行 go.sh"
+
 # 安裝依賴
 sudo apt-get update
-sudo apt-get install -y yt-dlp
-sudo apt-get install -y python3-pip
+sudo apt-get install -y yt-dlp python3-pip
 pip3 install requests
 
-# 確保 output 目錄存在，並清空內容
-mkdir -p output
-rm -rf output/*
-
 # 執行 Python 腳本
-python3 "$(dirname "$0")/scripts/yt_m.py"
+python3 scripts/yt_m.py
 
-# 提交變更
-git add output/
-git commit -m "Update M3U8 files" || echo "No changes to commit"
-git push
+echo "✅ yt_m.py 執行完成"
