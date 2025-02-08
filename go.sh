@@ -12,13 +12,18 @@ sudo apt-get install -y yt-dlp
 sudo apt-get install -y python3-pip
 pip3 install requests
 
+# 測試 yt-dlp 是否可用
+echo "🔍 測試 yt-dlp 是否可用"
+yt-dlp --version
+yt-dlp -g "https://www.youtube.com/watch?v=dQw4w9WgXcQ" || echo "⚠️ yt-dlp 解析失敗"
+
 # 確保 yt_info.txt 存在
 if [ ! -f "$(pwd)/yt_info.txt" ]; then
     echo "❌ 找不到 yt_info.txt，請確認檔案是否存在！"
     exit 1
 fi
 
-# 執行 Python 腳本 (確保從 scripts/ 執行)
+# 執行 Python 腳本
 echo "🐍 執行 scripts/yt_m.py"
 python3 "$(pwd)/scripts/yt_m.py"
 echo "✅ yt_m.py 執行完成"
