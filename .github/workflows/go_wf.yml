@@ -2,18 +2,16 @@ name: M3U generator
 
 on:
   schedule:
-    - cron: '0 0/3 * * *'
-  workflow_dispatch:
-
-permissions:
-  contents: write
+    - cron: '0 */3 * * *'  # 每 3 小時運行一次
+  workflow_dispatch:  # 可手動觸發
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
       - name: Set up Git
         run: |
@@ -23,17 +21,17 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y yt-dlp
-          sudo apt-get install -y python3-pip
+          sudo apt-get install -y yt-dlp python3-pip
           pip3 install requests
 
-      - name: Run go.sh
+      - name: Run yt_m.py
+        env:
+          YT_COOKIES: ${{ secrets.YT_COOKIES }}
         run: |
-          chmod +x go.sh
-          ./go.sh
+          python3 scripts/yt_m.py
 
-      - name: Commit & Push
+      - name: Commit & Push changes
         run: |
           git add -A
-          git diff --cached --quiet || git commit -m "Automated update by GitHub Actions"
+          git commit -m "Automated update by GitHub Actions" || echo "No changes to commit"
           git push
