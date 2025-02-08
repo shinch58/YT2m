@@ -1,6 +1,6 @@
 import os
 import subprocess
-yt-dlp --force-generic-extractor --cookies cookies.txt -g "https://www.youtube.com/watch?v=ylYJSBUgaMA"
+
 # 設定檔案路徑
 yt_info_path = "yt_info.txt"
 output_dir = "output"
