@@ -1,25 +1,44 @@
-name: Update M3U8
+name: M3U Generator
 
 on:
   schedule:
-    - cron: "0 */3 * * *"  # 每 3 小時執行一次
-  workflow_dispatch:
+    - cron: '0 */3 * * *'  # 每 3 小時執行一次
+  workflow_dispatch:  # 允許手動觸發
 
 jobs:
-  update_m3u8:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: 🛎️ 檢出 GitHub 儲存庫
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false
 
-      - name: 🔑 設定 GitHub Token
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          YT_COOKIES: ${{ secrets.YT_COOKIES }}
+      - name: Set up Git
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
 
-      - name: 🚀 執行 go.sh
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yt-dlp python3-pip
+          pip3 install requests
+
+      - name: Create cookies.txt
+        run: |
+          echo "${{ secrets.YT_COOKIES }}" > cookies.txt
+
+      - name: Run yt_m.py
         run: |
           chmod +x go.sh
           ./go.sh
+
+      - name: Commit & Push changes
+        run: |
+          git add output/*.m3u8 || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Automated update by GitHub Actions"
+            git push
+          else
+            echo "No changes to commit"
+          fi
