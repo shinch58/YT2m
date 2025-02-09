@@ -13,7 +13,7 @@ SFTP_HOST = os.getenv("SFTP_HOST", "your_sftp_server.com")
 SFTP_PORT = int(os.getenv("SFTP_PORT", 22))
 SFTP_USER = os.getenv("SFTP_USER", "your_username")
 SFTP_PASSWORD = os.getenv("SFTP_PASSWORD", "your_password")  # 使用密碼登入
-REMOTE_DIR = os.getenv("SFTP_REMOTE_DIR", "/remote/path/")
+SFTP_REMOTE_DIR = os.getenv("SFTP_REMOTE_DIR", "/remote/path/")
 
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
