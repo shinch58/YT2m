@@ -34,7 +34,7 @@ def grab(youtube_url):
     return "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/no_s.m3u8"  # 預設無訊號M3U8
 
 def process_yt_info():
-    """解析 yt_info.txt 並生成 M3U8 檔案"""
+    """解析 yt_info.txt 並生成 M3U8 & PHP 檔案"""
     with open(yt_info_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
@@ -53,15 +53,23 @@ def process_yt_info():
 
             # 生成 M3U8 文件
             m3u8_content = f"#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1280000\n{m3u8_url}\n"
-            output_path = os.path.join(output_dir, f"y{i:02d}.m3u8")
-            with open(output_path, "w", encoding="utf-8") as f:
+            m3u8_output_path = os.path.join(output_dir, f"y{i:02d}.m3u8")
+            with open(m3u8_output_path, "w", encoding="utf-8") as f:
                 f.write(m3u8_content)
 
-            print(f"✅ 生成 {output_path}")
+            # 生成 PHP 文件
+            php_content = f"""<?php
+    header('Location: {m3u8_url}');
+?>"""
+            php_output_path = os.path.join(output_dir, f"y{i:02d}.php")
+            with open(php_output_path, "w", encoding="utf-8") as f:
+                f.write(php_content)
+
+            print(f"✅ 生成 {m3u8_output_path} 和 {php_output_path}")
             i += 1
 
 def upload_files():
-    """使用 SFTP 上傳 M3U8 檔案"""
+    """使用 SFTP 上傳 M3U8 & PHP 檔案"""
     print("🚀 啟動 SFTP 上傳程序...")
     try:
         transport = paramiko.Transport((SFTP_HOST, SFTP_PORT))
