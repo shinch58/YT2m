@@ -1,17 +1,25 @@
 import os
 import subprocess
+import paramiko
 
 # 設定檔案路徑
 yt_info_path = "yt_info.txt"
 output_dir = "output"
 cookies_path = os.path.join(os.getcwd(), "cookies.txt")
 
+# SFTP 設定
+SFTP_HOST = os.getenv("SFTP_HOST", "your_sftp_server.com")
+SFTP_PORT = int(os.getenv("SFTP_PORT", 22))
+SFTP_USER = os.getenv("SFTP_USER", "your_username")
+SFTP_PASSWORD = os.getenv("SFTP_PASSWORD", "your_password")  # 使用密碼登入
+REMOTE_DIR = os.getenv("SFTP_REMOTE_DIR", "/remote/path/")
+
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
 
-#檢查cookie.txt
+# 檢查 cookies.txt
 if not os.path.exists(cookies_path):
-    print(f"❌ 錯誤: 找不到 cookies.txt ({cookies_path})")
+    print(f"❌ 找不到 cookies.txt ({cookies_path})")
 
 def grab(youtube_url):
     """使用 yt-dlp 解析 M3U8 連結"""
@@ -31,8 +39,6 @@ def process_yt_info():
         lines = f.readlines()
 
     i = 1
-    channel_name = None
-
     for line in lines:
         line = line.strip()
         if line.startswith("~~") or not line:
@@ -45,9 +51,8 @@ def process_yt_info():
             print(f"🔍 嘗試解析 M3U8: {youtube_url}")
             m3u8_url = grab(youtube_url)
 
-            # 生成正確的 M3U8 文件內容
+            # 生成 M3U8 文件
             m3u8_content = f"#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1280000\n{m3u8_url}\n"
-
             output_path = os.path.join(output_dir, f"y{i:02d}.m3u8")
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write(m3u8_content)
@@ -55,5 +60,39 @@ def process_yt_info():
             print(f"✅ 生成 {output_path}")
             i += 1
 
+def upload_files():
+    """使用 SFTP 上傳 M3U8 檔案"""
+    print("🚀 啟動 SFTP 上傳程序...")
+    try:
+        transport = paramiko.Transport((SFTP_HOST, SFTP_PORT))
+        transport.connect(username=SFTP_USER, password=SFTP_PASSWORD)
+        sftp = paramiko.SFTPClient.from_transport(transport)
+
+        print(f"✅ 成功連接到 SFTP：{SFTP_HOST}")
+
+        # 確保遠端目錄存在
+        try:
+            sftp.chdir(REMOTE_DIR)
+        except IOError:
+            print(f"📁 遠端目錄 {REMOTE_DIR} 不存在，正在創建...")
+            sftp.mkdir(REMOTE_DIR)
+            sftp.chdir(REMOTE_DIR)
+
+        # 上傳所有檔案
+        for file in os.listdir(output_dir):
+            local_path = os.path.join(output_dir, file)
+            remote_path = os.path.join(REMOTE_DIR, file)
+            if os.path.isfile(local_path):
+                print(f"⬆️ 上傳 {local_path} → {remote_path}")
+                sftp.put(local_path, remote_path)
+
+        sftp.close()
+        transport.close()
+        print("✅ SFTP 上傳完成！")
+
+    except Exception as e:
+        print(f"❌ SFTP 上傳失敗: {e}")
+
 if __name__ == "__main__":
     process_yt_info()
+    upload_files()
