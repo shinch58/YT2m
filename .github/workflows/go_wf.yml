@@ -31,7 +31,7 @@ jobs:
       - name: 📝 設置環境變數
         run: |
           echo "YT_COOKIES=${{ secrets.YT_COOKIES }}" >> $GITHUB_ENV
-          echo "SFTP_HOST=${{ secrets.SFTP_URL }}" >> $GITHUB_ENV
+          echo "SFTP_URL=${{ secrets.SFTP_URL }}" >> $GITHUB_ENV
           
 
       - name: 🚀 執行 go.sh
