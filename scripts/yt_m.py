@@ -46,7 +46,7 @@ def process_yt_info():
             m3u8_url = grab(youtube_url)
 
             # 生成正確的 M3U8 文件內容
-            m3u8_content = f"#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1280000\n#EXTINF:-1 , {channel_name}\n{m3u8_url}\n"
+            m3u8_content = f"#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1280000\n{m3u8_url}\n"
 
             output_path = os.path.join(output_dir, f"y{i:02d}.m3u8")
             with open(output_path, "w", encoding="utf-8") as f:
