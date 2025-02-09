@@ -38,5 +38,6 @@ if [[ -n "$(git status --porcelain output/)" ]]; then
 else
     echo "ℹ️ output 目錄沒有變更，不進行提交"
 fi
-echo "$(date)" > timestamp.txt
+export TZ=Asia/Taipei
+echo "$(date '+%m/%d/%Y %H:%M:%S %Z')" > scripts/timestamp.txt
 echo "✅ go.sh 執行完成"
