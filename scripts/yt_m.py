@@ -81,16 +81,16 @@ def upload_files():
 
         # 確保遠端目錄存在
         try:
-            sftp.chdir(REMOTE_DIR)
+            sftp.chdir(SFTP_REMOTE_DIR)
         except IOError:
-            print(f"📁 遠端目錄 {REMOTE_DIR} 不存在，正在創建...")
-            sftp.mkdir(REMOTE_DIR)
-            sftp.chdir(REMOTE_DIR)
+            print(f"📁 遠端目錄 {SFTP_REMOTE_DIR} 不存在，正在創建...")
+            sftp.mkdir(SFTP_REMOTE_DIR)
+            sftp.chdir(SFTP_REMOTE_DIR)
 
         # 上傳所有檔案
         for file in os.listdir(output_dir):
             local_path = os.path.join(output_dir, file)
-            remote_path = os.path.join(REMOTE_DIR, file)
+            remote_path = os.path.join(SFTP_REMOTE_DIR, file)
             if os.path.isfile(local_path):
                 print(f"⬆️ 上傳 {local_path} → {remote_path}")
                 sftp.put(local_path, remote_path)
