@@ -70,9 +70,9 @@ def process_yt_info():
             i += 1
 
 def upload_files():
-     """使用 SFTP 上傳 M3U8 檔案"""
-     print("🚀 啟動 SFTP 上傳程序...")
-     try:
+    """使用 SFTP 上傳 M3U8 檔案"""
+    print("🚀 啟動 SFTP 上傳程序...")
+    try:
         transport = paramiko.Transport((SFTP_HOST, SFTP_PORT))
         transport.connect(username=SFTP_USER, password=SFTP_PASSWORD)
         sftp = paramiko.SFTPClient.from_transport(transport)
