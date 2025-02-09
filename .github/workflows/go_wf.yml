@@ -1,4 +1,4 @@
-name: M3U Generator
+name: M3U Generator & SFTP Upload
 
 on:
   schedule:
@@ -26,10 +26,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y yt-dlp python3-pip
-          pip install requests
+          pip install requests paramiko  # 確保 Python 可以使用 SFTP
 
       - name: 📝 設置環境變數
-        run: echo "YT_COOKIES=${{ secrets.YT_COOKIES }}" >> $GITHUB_ENV
+        run: |
+          echo "YT_COOKIES=${{ secrets.YT_COOKIES }}" >> $GITHUB_ENV
+          echo "SFTP_HOST=${{ secrets.SFTP_HOST }}" >> $GITHUB_ENV
+          echo "SFTP_USER=${{ secrets.SFTP_USER }}" >> $GITHUB_ENV
+          echo "SFTP_PASS=${{ secrets.SFTP_PASS }}" >> $GITHUB_ENV
 
       - name: 🚀 執行 go.sh
         run: |
@@ -45,3 +49,7 @@ jobs:
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🌍 上傳 M3U8 檔案到 SFTP 伺服器
+        run: |
+          python3 scripts/yt_m.py --upload
