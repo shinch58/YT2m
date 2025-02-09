@@ -8,11 +8,12 @@ yt_info_path = "yt_info.txt"
 output_dir = "output"
 cookies_path = os.path.join(os.getcwd(), "cookies.txt")
 
-# **使用單一環境變數 SFTP_URL**
-SFTP_URL = os.getenv("SFTP_URL")
-
-# 解析 SFTP_URL
-parsed_url = urlparse(SFTP_URL)
+# SFTP 設定
+SFTP_HOST = os.getenv("SFTP_HOST", "your_sftp_server.com")
+SFTP_PORT = int(os.getenv("SFTP_PORT", 22))
+SFTP_USER = os.getenv("SFTP_USER", "your_username")
+SFTP_PASSWORD = os.getenv("SFTP_PASSWORD", "your_password")  # 使用密碼登入
+REMOTE_DIR = os.getenv("SFTP_REMOTE_DIR", "/remote/path/")
 
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
@@ -69,28 +70,27 @@ def process_yt_info():
             i += 1
 
 def upload_files():
-    """使用 SFTP 上傳 M3U8 和 PHP 檔案"""
+     """使用 SFTP 上傳 M3U8 檔案"""
     print("🚀 啟動 SFTP 上傳程序...")
     try:
-        # 建立 SFTP 連線
-        transport = paramiko.Transport((parsed_url.hostname, parsed_url.port or 22))
-        transport.connect(username=parsed_url.username, password=parsed_url.password)
+        transport = paramiko.Transport((SFTP_HOST, SFTP_PORT))
+        transport.connect(username=SFTP_USER, password=SFTP_PASSWORD)
         sftp = paramiko.SFTPClient.from_transport(transport)
 
-        print(f"✅ 成功連接到 SFTP：{parsed_url.hostname}")
+        print(f"✅ 成功連接到 SFTP：{SFTP_HOST}")
 
         # 確保遠端目錄存在
         try:
-            sftp.chdir(parsed_url.path)
+            sftp.chdir(REMOTE_DIR)
         except IOError:
-            print(f"📁 遠端目錄 {parsed_url.path} 不存在，正在創建...")
-            sftp.mkdir(parsed_url.path)
-            sftp.chdir(parsed_url.path)
+            print(f"📁 遠端目錄 {REMOTE_DIR} 不存在，正在創建...")
+            sftp.mkdir(REMOTE_DIR)
+            sftp.chdir(REMOTE_DIR)
 
-        # 上傳所有 M3U8 和 PHP 檔案
+        # 上傳所有檔案
         for file in os.listdir(output_dir):
             local_path = os.path.join(output_dir, file)
-            remote_path = os.path.join(parsed_url.path, file)
+            remote_path = os.path.join(REMOTE_DIR, file)
             if os.path.isfile(local_path):
                 print(f"⬆️ 上傳 {local_path} → {remote_path}")
                 sftp.put(local_path, remote_path)
