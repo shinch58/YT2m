@@ -38,5 +38,6 @@ if [[ -n "$(git status --porcelain output/)" ]]; then
 else
     echo "ℹ️ output 目錄沒有變更，不進行提交"
 fi
-
+echo "執行時間：$(date)" >> log.txt
+echo "$(date)" > timestamp.txt
 echo "✅ go.sh 執行完成"
