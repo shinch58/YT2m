@@ -35,6 +35,7 @@ jobs:
           echo "SFTP_PORT=${{ secrets.SFTP_PORT }}" >> $GITHUB_ENV
           echo "SFTP_USER=${{ secrets.SFTP_USER }}" >> $GITHUB_ENV
           echo "SFTP_PASSWORD=${{ secrets.SFTP_PASSWORD }}" >> $GITHUB_ENV
+          echo "SFTP_REMOTE_DIR=${{ secrets.SFTP_REMOTE_DIR }}" >> $GITHUB_ENV
 
       - name: 🚀 執行 go.sh
         run: |
