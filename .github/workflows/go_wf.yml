@@ -77,4 +77,6 @@ jobs:
           - name: Check if YT_COOKIE_B64 is set
             run: |
             echo "YT_COOKIE_B64: ${{ secrets.YT_COOKIE_B64 }}"
-          
+          - name: Decode YT_COOKIE_B64 and output to cookie01.txt
+            run: |
+          echo "${{ secrets.YT_COOKIE_B64 }}" | base64 --decode > cookie01.txt
