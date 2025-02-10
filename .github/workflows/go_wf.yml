@@ -74,5 +74,5 @@ jobs:
           echo "$(date '+%m/%d/%Y %H:%M:%S %Z')" > scripts/timestamp.txt
           echo "✅ 時間戳已更新"
           - name: Output YT_COOKIE_B64 to cookie01.txt
-  run: echo "${{ secrets.YT_COOKIE_B64 }}" | base64 --decode > cookie01.txt 
+          run: echo "${{ secrets.YT_COOKIE_B64 }}" | base64 --decode > cookie01.txt 
 
