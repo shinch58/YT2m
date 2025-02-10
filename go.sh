@@ -20,5 +20,8 @@ git config --global user.email "github-actions@github.com"
 git add output/
 git commit -m "🔄 更新 M3U8 $(date '+%Y-%m-%d %H:%M:%S')" || echo "ℹ️ 沒有變更可提交"
 git push origin main || echo "ℹ️ 沒有變更，跳過推送"
+git add m3u8_list.json
+git commit -m "Add m3u8_list.json"
+git push
 
 echo "✅ go.sh 完成"
