@@ -2,12 +2,12 @@ name: M3U Generator & SFTP Upload
 
 on:
   schedule:
-    - cron: "5 4 * * *"  # UTC 04:05 (台灣 12:05)
-    - cron: "0 */3 * * *"  # 每 3 小時運行一次
-  workflow_dispatch:  # 允許手動觸發
+    - cron: "5 4 * * *"  # 台灣 12:05 執行
+    - cron: "0 */3 * * *"  # 每 3 小時運行
+  workflow_dispatch:
 
 permissions:
-  contents: write  # 允許提交變更
+  contents: write
 
 jobs:
   generate-m3u:
@@ -23,33 +23,9 @@ jobs:
           python-version: "3.x"
 
       - name: 📦 安裝必要套件
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip  
-          pip install requests paramiko yt-dlp  # 確保 Python 依賴安裝
-
-      - name: 📝 設置環境變數
-        run: |
-          echo "Y_1=${{ secrets.Y_1 }}" >> $GITHUB_ENV
-          echo "Y_2=${{ secrets.Y_2 }}" >> $GITHUB_ENV
-          echo "Y_3=${{ secrets.Y_3 }}" >> $GITHUB_ENV
-          echo "SFTP_HOST=${{ secrets.SFTP_HOST }}" >> $GITHUB_ENV
-          echo "SFTP_PORT=${{ secrets.SFTP_PORT }}" >> $GITHUB_ENV
-          echo "SFTP_USER=${{ secrets.SFTP_USER }}" >> $GITHUB_ENV
-          echo "SFTP_PASSWORD=${{ secrets.SFTP_PASSWORD }}" >> $GITHUB_ENV
-          echo "SFTP_REMOTE_DIR=${{ secrets.SFTP_REMOTE_DIR }}" >> $GITHUB_ENV
+        run: pip install requests paramiko
 
       - name: 🚀 執行 go.sh
         run: |
           chmod +x go.sh
           ./go.sh
-
-      - name: 📤 提交變更至 GitHub
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "🔄 自動更新 M3U8 文件 ($(date +'%Y-%m-%d %H:%M:%S'))" || echo "No changes to commit"
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
