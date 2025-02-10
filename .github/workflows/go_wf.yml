@@ -25,19 +25,32 @@ jobs:
       - name: 📦 安裝必要套件
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip  
-pip install requests paramiko  # 確保 Python 可以使用 SFTP
+          sudo apt-get install -y python3-pip
+          pip install requests paramiko  # 確保 Python 可以使用 SFTP
 
       - name: 📝 設置環境變數
+        env:
+          YT_COOKIES: ${{ secrets.YT_COOKIES }}
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SFTP_REMOTE_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
+          Y_1: ${{ secrets.Y_1 }}
+          Y_2: ${{ secrets.Y_2 }}
+          Y_3: ${{ secrets.Y_3 }}
         run: |
-          echo "YT_COOKIES=${{ secrets.YT_COOKIES }}" >> $GITHUB_ENV
-          echo "SFTP_HOST=${{ secrets.SFTP_HOST }}" >> $GITHUB_ENV
-          echo "SFTP_PORT=${{ secrets.SFTP_PORT }}" >> $GITHUB_ENV
-          echo "SFTP_USER=${{ secrets.SFTP_USER }}" >> $GITHUB_ENV
-          echo "SFTP_PASSWORD=${{ secrets.SFTP_PASSWORD }}" >> $GITHUB_ENV
-          echo "SFTP_REMOTE_DIR=${{ secrets.SFTP_REMOTE_DIR }}" >> $GITHUB_ENV
+          echo "YT_COOKIES=${YT_COOKIES}" >> $GITHUB_ENV
+          echo "SFTP_HOST=${SFTP_HOST}" >> $GITHUB_ENV
+          echo "SFTP_PORT=${SFTP_PORT}" >> $GITHUB_ENV
+          echo "SFTP_USER=${SFTP_USER}" >> $GITHUB_ENV
+          echo "SFTP_PASSWORD=${SFTP_PASSWORD}" >> $GITHUB_ENV
+          echo "SFTP_REMOTE_DIR=${SFTP_REMOTE_DIR}" >> $GITHUB_ENV
+          echo "Y_1=${Y_1}" >> $GITHUB_ENV
+          echo "Y_2=${Y_2}" >> $GITHUB_ENV
+          echo "Y_3=${Y_3}" >> $GITHUB_ENV
 
-      - name: 🚀 執行 go.sh
+      - name: 🚀 執行 `go.sh`
         run: |
           chmod +x go.sh
           ./go.sh
@@ -47,11 +60,11 @@ pip install requests paramiko  # 確保 Python 可以使用 SFTP
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "🔄 自動更新 M3U8 文件 ($(date +'%m-%d-%Y %H:%M:%S'))" || echo "No changes to commit"
+          git commit -m "🔄 自動更新 M3U8 文件 ($(date +'%Y-%m-%d %H:%M:%S'))" || echo "No changes to commit"
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🌍 上傳 M3U8 檔案到 SFTP 伺服器
         run: |
-          python3 scripts/yt_m.py --upload
+          python3 scripts/yt_m.py
