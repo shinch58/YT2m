@@ -1,8 +1,7 @@
-name: M3U Generator & SFTP Upload
+name: M3U8 解析 & SFTP 上傳
 
 on:
   schedule:
-    - cron: "5 4 * * *"
     - cron: "0 */3 * * *"
   workflow_dispatch:
 
@@ -19,10 +18,14 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: 📦 安裝必要套件
+      - name: 📦 安裝套件
         run: pip install requests paramiko  
 
       - name: 🚀 執行 go.sh
+        env:
+          Y_1: ${{ secrets.Y_1 }}
+          Y_2: ${{ secrets.Y_2 }}
+          Y_3: ${{ secrets.Y_3 }}
         run: |
           chmod +x go.sh
           ./go.sh
