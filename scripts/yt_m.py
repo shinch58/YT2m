@@ -1,38 +1,70 @@
 import os
-import subprocess
+import re
+import requests
 import paramiko
-from urllib.parse import urlparse
 
-# 設定檔案路徑
+# GitHub Actions 變數 (三組 API 金鑰)
+YOUTUBE_API_KEYS = [
+    os.getenv("Y_1", ""),
+    os.getenv("Y_2", ""),
+    os.getenv("Y_3", "")
+]
+
+# 檔案路徑
 yt_info_path = "yt_info.txt"
 output_dir = "output"
-cookies_path = os.path.join(os.getcwd(), "cookies.txt")
 
 # SFTP 設定
 SFTP_HOST = os.getenv("SFTP_HOST", "your_sftp_server.com")
 SFTP_PORT = int(os.getenv("SFTP_PORT", 22))
 SFTP_USER = os.getenv("SFTP_USER", "your_username")
-SFTP_PASSWORD = os.getenv("SFTP_PASSWORD", "your_password")  # 使用密碼登入
+SFTP_PASSWORD = os.getenv("SFTP_PASSWORD", "your_password")
 SFTP_REMOTE_DIR = os.getenv("SFTP_REMOTE_DIR", "/remote/path/")
 
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
 
-# 檢查 cookies.txt
-if not os.path.exists(cookies_path):
-    print(f"❌ 找不到 cookies.txt ({cookies_path})")
+def extract_video_id(url):
+    """從 YouTube 連結提取影片 ID"""
+    match = re.search(r"(?:v=|\/)([0-9A-Za-z_-]{11})", url)
+    return match.group(1) if match else None
 
 def grab(youtube_url):
-    """使用 yt-dlp 解析 M3U8 連結"""
-    yt_dlp_cmd = f"yt-dlp --geo-bypass --cookies cookies.txt --sleep-requests 1 --limit-rate 500k --retries 5 --fragment-retries 10 --no-warnings --quiet --no-check-certificate --no-playlist -g {youtube_url}"
+    """使用三組 YouTube API 金鑰或 HTTP 解析 M3U8 連結"""
+    video_id = extract_video_id(youtube_url)
+    if not video_id:
+        print(f"⚠️ 無效的 YouTube 連結: {youtube_url}")
+        return "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/no_s.m3u8"
+
+    # 1️⃣ 嘗試使用 YouTube API (輪流使用三組金鑰)
+    for api_key in YOUTUBE_API_KEYS:
+        if api_key:
+            api_url = f"https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id={video_id}&key={api_key}"
+            try:
+                response = requests.get(api_url, timeout=10)
+                response.raise_for_status()
+                data = response.json()
+
+                if "items" in data and data["items"]:
+                    hls_url = data["items"][0].get("liveStreamingDetails", {}).get("hlsManifestUrl")
+                    if hls_url:
+                        print(f"✅ API 解析成功: {hls_url}")
+                        return hls_url
+            except requests.RequestException:
+                print("⚠️ API 解析失敗，嘗試下一組金鑰...")
+
+    # 2️⃣ 如果 API 失敗，改用 HTTP 解析 HTML
     try:
-        result = subprocess.run(yt_dlp_cmd, shell=True, capture_output=True, text=True, check=True)
-        m3u8_url = result.stdout.strip()
-        if m3u8_url.startswith("http"):
-            return m3u8_url
-    except subprocess.CalledProcessError as e:
-        print(f"⚠️ yt-dlp 解析失敗，錯誤訊息: {e.stderr}")
-    return "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/no_s.m3u8"  # 預設無訊號M3U8
+        print(f"🔍 嘗試透過 HTTP 解析 M3U8: {youtube_url}")
+        response = requests.get(youtube_url, timeout=10)
+        response.raise_for_status()
+        m3u8_matches = re.findall(r"https://[^\"']+\.m3u8", response.text)
+        if m3u8_matches:
+            return m3u8_matches[0]
+    except requests.RequestException as e:
+        print(f"⚠️ HTTP 解析失敗: {e}")
+
+    return "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/no_s.m3u8"
 
 def process_yt_info():
     """解析 yt_info.txt 並生成 M3U8 和 PHP 檔案"""
@@ -49,7 +81,6 @@ def process_yt_info():
             channel_name = parts[0].strip() if len(parts) > 0 else f"Channel {i}"
         else:  # YouTube 連結行
             youtube_url = line
-            print(f"🔍 嘗試解析 M3U8: {youtube_url}")
             m3u8_url = grab(youtube_url)
 
             # 生成 M3U8 文件
