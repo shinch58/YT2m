@@ -1,20 +1,14 @@
 import os
-import re
 import requests
+import re
 import paramiko
 
-# GitHub Actions 變數 (三組 API 金鑰)
-YOUTUBE_API_KEYS = [
-    os.getenv("Y_1", ""),
-    os.getenv("Y_2", ""),
-    os.getenv("Y_3", "")
-]
+# 設定檔案路徑
+yt_info_path = "yt_info.txt"   # 原始 YouTube 頻道清單
+tmp_info_path = "tmp_inf.txt"  # 轉換後的清單
+output_dir = "output"          # M3U8 生成目錄
 
-# 檔案路徑
-yt_info_path = "yt_info.txt"
-output_dir = "output"
-
-# SFTP 設定
+# SFTP 設定（從 GitHub Actions 變數讀取）
 SFTP_HOST = os.getenv("SFTP_HOST", "your_sftp_server.com")
 SFTP_PORT = int(os.getenv("SFTP_PORT", 22))
 SFTP_USER = os.getenv("SFTP_USER", "your_username")
@@ -24,51 +18,57 @@ SFTP_REMOTE_DIR = os.getenv("SFTP_REMOTE_DIR", "/remote/path/")
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
 
-def extract_video_id(url):
-    """從 YouTube 連結提取影片 ID"""
-    match = re.search(r"(?:v=|\/)([0-9A-Za-z_-]{11})", url)
-    return match.group(1) if match else None
+def get_watch_url(youtube_url):
+    """將 @handle/live 轉換為 /watch?v= 連結"""
+    match = re.search(r"youtube\.com/@([\w-]+)/live", youtube_url)
+    if not match:
+        return youtube_url  # 不是 @handle/live 格式，直接返回
+
+    handle = match.group(1)
+    channel_url = f"https://www.youtube.com/@{handle}"
+
+    # 嘗試獲取頻道頁面 HTML
+    headers = {"User-Agent": "Mozilla/5.0"}
+    response = requests.get(channel_url, headers=headers)
+
+    # 解析直播影片 ID
+    match = re.search(r'"videoId":"([\w-]+)"', response.text)
+    if match:
+        video_id = match.group(1)
+        return f"https://www.youtube.com/watch?v={video_id}"
+
+    return youtube_url  # 如果找不到 videoId，則返回原網址
+
+def convert_live_links():
+    """轉換 yt_info.txt 內的 @handle/live 連結，存入 tmp_inf.txt"""
+    with open(yt_info_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
+    new_lines = []
+    for line in lines:
+        line = line.strip()
+        if line.startswith("http") and "youtube.com" in line:
+            converted_url = get_watch_url(line)
+            new_lines.append(converted_url + "\n")
+        else:
+            new_lines.append(line + "\n")
+
+    with open(tmp_info_path, "w", encoding="utf-8") as f:
+        f.writelines(new_lines)
+
+    print("✅ 轉換完成，儲存至 tmp_inf.txt")
 
 def grab(youtube_url):
-    """使用三組 YouTube API 金鑰或 HTTP 解析 M3U8 連結"""
-    video_id = extract_video_id(youtube_url)
-    if not video_id:
-        print(f"⚠️ 無效的 YouTube 連結: {youtube_url}")
-        return "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/no_s.m3u8"
-
-    # 1️⃣ 嘗試使用 YouTube API (輪流使用三組金鑰)
-    for api_key in YOUTUBE_API_KEYS:
-        if api_key:
-            api_url = f"https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id={video_id}&key={api_key}"
-            try:
-                response = requests.get(api_url, timeout=10)
-                response.raise_for_status()
-                data = response.json()
-
-                if "items" in data and data["items"]:
-                    hls_url = data["items"][0].get("liveStreamingDetails", {}).get("hlsManifestUrl")
-                    if hls_url:
-                        print(f"✅ API 解析成功: {hls_url}")
-                        return hls_url
-            except requests.RequestException:
-                print("⚠️ API 解析失敗，嘗試下一組金鑰...")
-
-    # 2️⃣ 如果 API 失敗，改用 HTTP 解析 HTML
-    try:
-        print(f"🔍 嘗試透過 HTTP 解析 M3U8: {youtube_url}")
-        response = requests.get(youtube_url, timeout=10)
-        response.raise_for_status()
-        m3u8_matches = re.findall(r"https://[^\"']+\.m3u8", response.text)
-        if m3u8_matches:
-            return m3u8_matches[0]
-    except requests.RequestException as e:
-        print(f"⚠️ HTTP 解析失敗: {e}")
-
+    """解析 YouTube M3U8 連結（使用備用 M3U8）"""
+    print(f"🔍 嘗試解析 M3U8: {youtube_url}")
+    
+    # 這裡可以改成 YouTube API 解析 M3U8
+    # 目前使用預設的無訊號 M3U8
     return "https://raw.githubusercontent.com/shinch58/YT2m/main/assets/no_s.m3u8"
 
 def process_yt_info():
-    """解析 yt_info.txt 並生成 M3U8 和 PHP 檔案"""
-    with open(yt_info_path, "r", encoding="utf-8") as f:
+    """解析 tmp_inf.txt 並生成 M3U8 和 PHP 檔案"""
+    with open(tmp_info_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     i = 1
@@ -134,5 +134,6 @@ def upload_files():
         print(f"❌ SFTP 上傳失敗: {e}")
 
 if __name__ == "__main__":
-    process_yt_info()
-    upload_files()
+    convert_live_links()  # 轉換 @handle/live 連結
+    process_yt_info()  # 解析 tmp_inf.txt
+    upload_files()  # 上傳到 SFTP（可選）
