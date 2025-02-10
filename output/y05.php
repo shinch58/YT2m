@@ -1,0 +1,1 @@
+<?php echo 'https://example.com/fake_m3u8_for/https://www.youtube.com/watch?v=CQVQSjo5BW0'; ?>

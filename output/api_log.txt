@@ -1,0 +1,168 @@
+🔍 開始執行 yt_m.py
+🔍 嘗試解析 @頻道名稱: https://www.youtube.com/@bdtvbest/live
+🔍 API 回應: {
+  "kind": "youtube#searchListResponse",
+  "etag": "6MSJg8e3P-5zz32RCvQtxK6y-Oc",
+  "regionCode": "US",
+  "pageInfo": {
+    "totalResults": 2,
+    "resultsPerPage": 2
+  },
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "IkPuaYstN31hn1X7qwnp7Dyx3ls",
+      "id": {
+        "kind": "youtube#channel",
+        "channelId": "UCbq-GWM5PVDRWuer41w6XvA"
+      },
+      "snippet": {
+        "publishedAt": "2019-04-03T08:23:02Z",
+        "channelId": "UCbq-GWM5PVDRWuer41w6XvA",
+        "title": "寶島文化台",
+        "description": "寶島文化電視台，全國有線電視頻道132台。敬請鎖定。",
+        "thumbnails": {
+          "default": {
+            "url": "https://yt3.ggpht.com/oiQoTBSr2RNIL-mlfSw-LeOuXrQRks8N_03BMjISQbyLnGNYsVyIOc4bzRIjWoXKXUDxhK2UDg=s88-c-k-c0xffffffff-no-rj-mo"
+          },
+          "medium": {
+            "url": "https://yt3.ggpht.com/oiQoTBSr2RNIL-mlfSw-LeOuXrQRks8N_03BMjISQbyLnGNYsVyIOc4bzRIjWoXKXUDxhK2UDg=s240-c-k-c0xffffffff-no-rj-mo"
+          },
+          "high": {
+            "url": "https://yt3.ggpht.com/oiQoTBSr2RNIL-mlfSw-LeOuXrQRks8N_03BMjISQbyLnGNYsVyIOc4bzRIjWoXKXUDxhK2UDg=s800-c-k-c0xffffffff-no-rj-mo"
+          }
+        },
+        "channelTitle": "寶島文化台",
+        "liveBroadcastContent": "none",
+        "publishTime": "2019-04-03T08:23:02Z"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "rC7DGu5Eu2Qzdex9XozoSthokS0",
+      "id": {
+        "kind": "youtube#channel",
+        "channelId": "UCUVJHC13mu_IOQ0wBeV2Ogg"
+      },
+      "snippet": {
+        "publishedAt": "2023-09-08T10:34:00Z",
+        "channelId": "UCUVJHC13mu_IOQ0wBeV2Ogg",
+        "title": "朱董瑪斯特萬事達",
+        "description": "朱璨詮的YT頻道.",
+        "thumbnails": {
+          "default": {
+            "url": "https://yt3.ggpht.com/GQcQVPu3s5jzTwOEniBj4FIA40izRJ966e7atZVLAUpGMVvKud6RnhLw6qaLEkt_Xd5j-8t3YA=s88-c-k-c0xffffffff-no-rj-mo"
+          },
+          "medium": {
+            "url": "https://yt3.ggpht.com/GQcQVPu3s5jzTwOEniBj4FIA40izRJ966e7atZVLAUpGMVvKud6RnhLw6qaLEkt_Xd5j-8t3YA=s240-c-k-c0xffffffff-no-rj-mo"
+          },
+          "high": {
+            "url": "https://yt3.ggpht.com/GQcQVPu3s5jzTwOEniBj4FIA40izRJ966e7atZVLAUpGMVvKud6RnhLw6qaLEkt_Xd5j-8t3YA=s800-c-k-c0xffffffff-no-rj-mo"
+          }
+        },
+        "channelTitle": "朱董瑪斯特萬事達",
+        "liveBroadcastContent": "none",
+        "publishTime": "2023-09-08T10:34:00Z"
+      }
+    }
+  ]
+}
+✅ 解析 @頻道名稱成功: @bdtvbest → UCbq-GWM5PVDRWuer41w6XvA
+🔍 API 回應: {
+  "kind": "youtube#searchListResponse",
+  "etag": "cN1BB5Mo8jKk0ysZs2U7A0bp-Kw",
+  "regionCode": "US",
+  "pageInfo": {
+    "totalResults": 1,
+    "resultsPerPage": 1
+  },
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "31MIMasYOB77Z6KrsRSiJLR30r8",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "CQVQSjo5BW0"
+      }
+    }
+  ]
+}
+✅ 解析直播影片成功: https://www.youtube.com/@bdtvbest/live → https://www.youtube.com/watch?v=CQVQSjo5BW0
+🔍 嘗試解析 @頻道名稱: https://www.youtube.com/@chengsin94/live
+🔍 API 回應: {
+  "kind": "youtube#searchListResponse",
+  "etag": "ycIvc7rENDA6N4raDbxbxz2mC2E",
+  "regionCode": "US",
+  "pageInfo": {
+    "totalResults": 1,
+    "resultsPerPage": 1
+  },
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "d6SPu8bEQ7L3e5CBwBRWjPNI7xA",
+      "id": {
+        "kind": "youtube#channel",
+        "channelId": "UCRvNvZZH79MpSRubnW9pdcw"
+      },
+      "snippet": {
+        "publishedAt": "2014-05-23T09:01:21Z",
+        "channelId": "UCRvNvZZH79MpSRubnW9pdcw",
+        "title": "誠心電視台",
+        "description": "線上直播、頻道熱門節目、單元精選.",
+        "thumbnails": {
+          "default": {
+            "url": "https://yt3.ggpht.com/ytc/AIdro_kgYxjPGZSXEnE0HXdDLAoChI1VqRBd45Qcp9GRh2rp4Pk=s88-c-k-c0xffffffff-no-rj-mo"
+          },
+          "medium": {
+            "url": "https://yt3.ggpht.com/ytc/AIdro_kgYxjPGZSXEnE0HXdDLAoChI1VqRBd45Qcp9GRh2rp4Pk=s240-c-k-c0xffffffff-no-rj-mo"
+          },
+          "high": {
+            "url": "https://yt3.ggpht.com/ytc/AIdro_kgYxjPGZSXEnE0HXdDLAoChI1VqRBd45Qcp9GRh2rp4Pk=s800-c-k-c0xffffffff-no-rj-mo"
+          }
+        },
+        "channelTitle": "誠心電視台",
+        "liveBroadcastContent": "none",
+        "publishTime": "2014-05-23T09:01:21Z"
+      }
+    }
+  ]
+}
+✅ 解析 @頻道名稱成功: @chengsin94 → UCRvNvZZH79MpSRubnW9pdcw
+🔍 API 回應: {
+  "kind": "youtube#searchListResponse",
+  "etag": "tq6hLgSea1fHcQVhjbw6KJc5NDk",
+  "regionCode": "US",
+  "pageInfo": {
+    "totalResults": 1,
+    "resultsPerPage": 1
+  },
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "gwoq63MGWL5ozIWkelKA1umxZGQ",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "7xTKTeQX1y0"
+      }
+    }
+  ]
+}
+✅ 解析直播影片成功: https://www.youtube.com/@chengsin94/live → https://www.youtube.com/watch?v=7xTKTeQX1y0
+✅ 轉換完成，儲存至 tmp_inf.txt
+🔍 嘗試解析 M3U8: https://www.youtube.com/watch?v=CQVQSjo5BW0
+✅ 生成 y05.m3u8 和 y05.php
+🔍 嘗試解析 M3U8: https://www.youtube.com/watch?v=7xTKTeQX1y0
+✅ 生成 y08.m3u8 和 y08.php
+🚀 啟動 SFTP 上傳程序...
+✅ 已上傳: y08.php
+✅ 已上傳: y02.php
+✅ 已上傳: y05.m3u8
+✅ 已上傳: y01.m3u8
+✅ 已上傳: y08.m3u8
+✅ 已上傳: api_log.txt
+✅ 已上傳: y02.m3u8
+✅ 已上傳: y05.php
+✅ 已上傳: y01.php
+✅ SFTP 上傳完成
+✅ yt_m.py 執行完成
