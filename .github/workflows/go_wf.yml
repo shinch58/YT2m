@@ -20,10 +20,10 @@ jobs:
         with:
           python-version: 3.8
 
-      # Install yt-dlp dependency
-      - name: Install yt-dlp
+      - name: Install dependencies
         run: |
-          pip install -U yt-dlp
+         pip install -r requirements.txt
+         pip install -U yt-dlp paramiko
 
       # Decode YT_COOKIE_B64 and generate cookies.txt
       - name: Output YT_COOKIE_B64 to cookie01.txt
