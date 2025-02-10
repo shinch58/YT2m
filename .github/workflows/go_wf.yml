@@ -72,5 +72,9 @@ jobs:
         run: |
           export TZ=Asia/Taipei
           echo "$(date '+%m/%d/%Y %H:%M:%S %Z')" > scripts/timestamp.txt
-          echo "✅ 時間戳已更新"- name: Debug YT_COOKIE_B64 value
-          run: echo "YT_COOKIE_B64: ${{ secrets.YT_COOKIE_B64 }}"
+          echo "✅ 時間戳已更新"
+
+          - name: Check if YT_COOKIE_B64 is set
+            run: |
+            echo "YT_COOKIE_B64: ${{ secrets.YT_COOKIE_B64 }}"
+          
