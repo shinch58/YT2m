@@ -1,31 +1,70 @@
-name: M3U8 解析 & SFTP 上傳
+name: Update M3U8 and Upload
 
 on:
   schedule:
-    - cron: "0 */3 * * *"
+    - cron: "5 4 * * *"  # 每天 UTC 04:05（即 UTC+8 中午 12:05）
+    - cron: "0 */3 * * *"  # 每 3 小時運行一次
   workflow_dispatch:
 
 jobs:
-  generate-m3u:
+  update_m3u8:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔽 檢出 GitHub Repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: 🏗️ 設置 Python 環境
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
 
-      - name: 📦 安裝套件
-        run: pip install requests paramiko  
+    - name: Install dependencies
+      run: |
+        pip install -U yt-dlp paramiko
 
-      - name: 🚀 執行 go.sh
-        env:
-          Y_1: ${{ secrets.Y_1 }}
-          Y_2: ${{ secrets.Y_2 }}
-          Y_3: ${{ secrets.Y_3 }}
-        run: |
-          chmod +x go.sh
-          ./go.sh
+    - name: Decode and generate cookies.txt
+      run: |
+        if [ -z "${{ secrets.YT_COOKIE_B64 }}" ]; then
+          echo "❌ 環境變數 YT_COOKIE_B64 未設置"
+          exit 1
+        fi
+
+        # 解碼 YT_COOKIE_B64 並生成 cookies.txt
+        echo "${{ secrets.YT_COOKIE_B64 }}" | base64 --decode | tr -d '\r' > cookies.txt
+        echo "✅ cookies.txt 生成完成"
+
+    - name: Execute yt_m.py to parse M3U8 and upload files
+      run: |
+        python3 scripts/yt_m.py
+
+    - name: Clean up cookies.txt
+      run: |
+        rm -f cookies.txt
+        echo "✅ cookies.txt 已刪除"
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+
+    - name: Commit and push changes
+      run: |
+        if [[ -n "$(git status --porcelain output/)" ]]; then
+          echo "📂 偵測到 output 變更，開始提交..."
+          git add output/
+          git commit -m "🔄 更新 M3U8 文件 $(date '+%Y-%m-%d %H:%M:%S')"
+          git push origin main
+          echo "✅ 變更已提交至 GitHub"
+        else
+          echo "ℹ️ output 目錄沒有變更，不進行提交"
+        fi
+
+    - name: Set timezone and create timestamp file
+      run: |
+        export TZ=Asia/Taipei
+        echo "$(date '+%m/%d/%Y %H:%M:%S %Z')" > scripts/timestamp.txt
+        echo "✅ 時間戳文件已生成"
+
+    - name: Final message
+      run: echo "✅ go_wf.yml 完成"
