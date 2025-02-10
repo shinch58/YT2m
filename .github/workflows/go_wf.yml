@@ -25,8 +25,8 @@ jobs:
       - name: 📦 安裝必要套件
         run: |
           sudo apt-get update
-          sudo apt-get install -y yt-dlp python3-pip
-          pip install requests paramiko  # 確保 Python 可以使用 SFTP
+          sudo apt-get install -y python3-pip  
+pip install requests paramiko  # 確保 Python 可以使用 SFTP
 
       - name: 📝 設置環境變數
         run: |
