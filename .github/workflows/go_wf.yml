@@ -2,12 +2,9 @@ name: M3U Generator & SFTP Upload
 
 on:
   schedule:
-    - cron: "5 4 * * *"  # 台灣 12:05 執行
-    - cron: "0 */3 * * *"  # 每 3 小時運行
+    - cron: "5 4 * * *"
+    - cron: "0 */3 * * *"
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   generate-m3u:
@@ -23,7 +20,7 @@ jobs:
           python-version: "3.x"
 
       - name: 📦 安裝必要套件
-        run: pip install requests paramiko
+        run: pip install requests paramiko  
 
       - name: 🚀 執行 go.sh
         run: |
