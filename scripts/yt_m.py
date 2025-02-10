@@ -1,49 +1,69 @@
 import os
-import requests
+import re
 import json
+import requests
 import paramiko
 
 # 設定檔案路徑
-yt_info_path = "yt_info.txt"
-tmp_info_path = "tmp_inf.txt"
-output_dir = "output"
-os.makedirs(output_dir, exist_ok=True)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+yt_info_path = os.path.join(BASE_DIR, "../yt_info.txt")
+tmp_info_path = os.path.join(BASE_DIR, "../tmp_inf.txt")
+output_dir = os.path.join(BASE_DIR, "../output")
+log_file = os.path.join(BASE_DIR, "../output/api_log.txt")
 
-# 讀取 API 金鑰（GitHub Actions 設定的三組 API 金鑰）
-API_KEYS = [
-    os.getenv("Y_1"),
-    os.getenv("Y_2"),
-    os.getenv("Y_3")
-]
+# 讀取 GitHub Actions 設定的 API 金鑰
+API_KEYS = [os.getenv("Y_1"), os.getenv("Y_2"), os.getenv("Y_3")]
 
-# SFTP 設定（來自 GitHub Actions）
-SFTP_HOST = os.getenv("SFTP_HOST", "your_sftp_server.com")
-SFTP_PORT = int(os.getenv("SFTP_PORT", 22))
-SFTP_USER = os.getenv("SFTP_USER", "your_username")
-SFTP_PASSWORD = os.getenv("SFTP_PASSWORD", "your_password")
-SFTP_REMOTE_DIR = os.getenv("SFTP_REMOTE_DIR", "/remote/path/")
+def log_message(message):
+    """紀錄 API 解析日誌"""
+    with open(log_file, "a", encoding="utf-8") as log:
+        log.write(message + "\n")
+    print(message)
+
+def get_channel_id(custom_url, api_key):
+    """透過 YouTube API 查詢 @名稱對應的 channelId"""
+    api_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={custom_url}&type=channel&key={api_key}"
+    
+    try:
+        response = requests.get(api_url)
+        data = response.json()
+        log_message(f"🔍 API 回應: {json.dumps(data, indent=2, ensure_ascii=False)}")
+
+        if "items" in data and len(data["items"]) > 0:
+            channel_id = data["items"][0]["snippet"]["channelId"]
+            log_message(f"✅ 解析 @頻道名稱成功: {custom_url} → {channel_id}")
+            return channel_id
+        else:
+            log_message(f"⚠️ 無法取得頻道 ID: {custom_url}")
+            return None
+    except Exception as e:
+        log_message(f"❌ API 請求錯誤: {e}")
+        return None
 
 def get_video_id(channel_url, api_key):
     """使用 YouTube API 解析頻道的直播影片 ID"""
-    channel_id = channel_url.split("/")[-1]  # 取得 @名稱
+    custom_name = channel_url.split("/")[-2]  # 取得 @名稱
+    channel_id = get_channel_id(custom_name, api_key)
+
+    if not channel_id:
+        return None  # 解析失敗
+
     api_url = f"https://www.googleapis.com/youtube/v3/search?part=id&channelId={channel_id}&eventType=live&type=video&key={api_key}"
 
     try:
         response = requests.get(api_url)
         data = response.json()
-
-        # 記錄 API 回應
-        print(f"🔍 API 回應: {json.dumps(data, indent=2)}")
+        log_message(f"🔍 API 回應: {json.dumps(data, indent=2, ensure_ascii=False)}")
 
         if "items" in data and len(data["items"]) > 0:
             video_id = data["items"][0]["id"]["videoId"]
-            print(f"✅ 解析成功: {channel_url} → https://www.youtube.com/watch?v={video_id}")
+            log_message(f"✅ 解析直播影片成功: {channel_url} → https://www.youtube.com/watch?v={video_id}")
             return video_id
         else:
-            print(f"⚠️ API 無法取得直播 ID: {channel_url}")
+            log_message(f"⚠️ 該頻道目前沒有直播: {channel_url}")
             return None
     except Exception as e:
-        print(f"❌ API 請求錯誤: {e}")
+        log_message(f"❌ API 請求錯誤: {e}")
         return None
 
 def convert_yt_info():
@@ -66,13 +86,12 @@ def convert_yt_info():
             api_key = API_KEYS[api_key_index % len(API_KEYS)]
             api_key_index += 1
 
-            print(f"🔑 使用 API 金鑰: (隱藏)")
-            video_id = get_video_id(line, api_key)
-
-            if video_id:
-                new_line = f"https://www.youtube.com/watch?v={video_id}"
+            if "/@" in line:  # 解析 @頻道名稱
+                log_message(f"🔍 嘗試解析 @頻道名稱: {line}")
+                video_id = get_video_id(line, api_key)
+                new_line = f"https://www.youtube.com/watch?v={video_id}" if video_id else line
             else:
-                new_line = line  # 保留原始網址（解析失敗）
+                new_line = line  # 已經是影片網址則不變
 
             converted_lines.append(new_line)
 
@@ -80,78 +99,62 @@ def convert_yt_info():
     with open(tmp_info_path, "w", encoding="utf-8") as f:
         f.write("\n".join(converted_lines) + "\n")
 
-    print("✅ 轉換完成，儲存至 tmp_inf.txt")
+    log_message("✅ 轉換完成，儲存至 tmp_inf.txt")
 
-def grab_m3u8(youtube_url):
-    """使用 requests 解析 M3U8 連結"""
-    hls_url = f"https://example.com/fake_m3u8_for/{youtube_url.split('=')[-1]}"  # 模擬 HLS 連結
-    print(f"✅ 解析成功: {youtube_url} → {hls_url}")
-    return hls_url
-
-def process_yt_info():
-    """解析 `tmp_inf.txt` 生成 M3U8 和 PHP 檔案"""
+def parse_m3u8():
+    """解析 `tmp_inf.txt` 內的 YouTube 影片網址並生成 M3U8"""
     with open(tmp_info_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
-    i = 1
-    for line in lines:
+    os.makedirs(output_dir, exist_ok=True)
+
+    for i, line in enumerate(lines):
         line = line.strip()
-        if line.startswith("~~") or not line:
-            continue
-        if "|" in line:
-            parts = line.split("|")
-            channel_name = parts[0].strip() if len(parts) > 0 else f"Channel {i}"
-        else:
-            youtube_url = line
-            print(f"🔍 嘗試解析 M3U8: {youtube_url}")
-            m3u8_url = grab_m3u8(youtube_url)
+        if line.startswith("https://www.youtube.com/watch?v="):
+            video_url = line
+            log_message(f"🔍 嘗試解析 M3U8: {video_url}")
+            # 模擬解析 (這裡應該使用 yt-dlp 或其他方法)
+            m3u8_url = f"https://example.com/fake_m3u8_for/{video_url}"
+            m3u8_filename = f"y{i+1:02d}.m3u8"
+            php_filename = f"y{i+1:02d}.php"
 
-            # 生成 M3U8 文件
-            m3u8_content = f"#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1280000\n{m3u8_url}\n"
-            output_m3u8 = os.path.join(output_dir, f"y{i:02d}.m3u8")
-            with open(output_m3u8, "w", encoding="utf-8") as f:
-                f.write(m3u8_content)
+            with open(os.path.join(output_dir, m3u8_filename), "w", encoding="utf-8") as f:
+                f.write(m3u8_url)
 
-            # 生成 PHP 文件
-            php_content = f"<?php\nheader('Location: {m3u8_url}');\n?>"
-            output_php = os.path.join(output_dir, f"y{i:02d}.php")
-            with open(output_php, "w", encoding="utf-8") as f:
-                f.write(php_content)
+            with open(os.path.join(output_dir, php_filename), "w", encoding="utf-8") as f:
+                f.write(f"<?php echo '{m3u8_url}'; ?>")
 
-            print(f"✅ 生成 {output_m3u8} 和 {output_php}")
-            i += 1
+            log_message(f"✅ 生成 {m3u8_filename} 和 {php_filename}")
 
-def upload_files():
-    """使用 SFTP 上傳 M3U8 檔案"""
-    print("🚀 啟動 SFTP 上傳程序...")
+def upload_sftp():
+    """將解析出的 M3U8 檔案上傳至 SFTP"""
+    sftp_host = os.getenv("SFTP_HOST")
+    sftp_port = int(os.getenv("SFTP_PORT", 22))
+    sftp_user = os.getenv("SFTP_USER")
+    sftp_password = os.getenv("SFTP_PASSWORD")
+    remote_dir = os.getenv("SFTP_REMOTE_DIR")
+
     try:
-        transport = paramiko.Transport((SFTP_HOST, SFTP_PORT))
-        transport.connect(username=SFTP_USER, password=SFTP_PASSWORD)
+        log_message("🚀 啟動 SFTP 上傳程序...")
+        transport = paramiko.Transport((sftp_host, sftp_port))
+        transport.connect(username=sftp_user, password=sftp_password)
         sftp = paramiko.SFTPClient.from_transport(transport)
-
-        print(f"✅ 成功連接到 SFTP：{SFTP_HOST}")
-
-        try:
-            sftp.chdir(SFTP_REMOTE_DIR)
-        except IOError:
-            print(f"📁 遠端目錄 {SFTP_REMOTE_DIR} 不存在，正在創建...")
-            sftp.mkdir(SFTP_REMOTE_DIR)
-            sftp.chdir(SFTP_REMOTE_DIR)
 
         for file in os.listdir(output_dir):
             local_path = os.path.join(output_dir, file)
-            remote_path = os.path.join(SFTP_REMOTE_DIR, file)
-            if os.path.isfile(local_path):
-                print(f"⬆️ 上傳 {local_path} → {remote_path}")
-                sftp.put(local_path, remote_path)
+            remote_path = f"{remote_dir}/{file}"
+            sftp.put(local_path, remote_path)
+            log_message(f"✅ 已上傳: {file}")
 
         sftp.close()
         transport.close()
-        print("✅ SFTP 上傳完成！")
+        log_message("✅ SFTP 上傳完成")
     except Exception as e:
-        print(f"❌ SFTP 上傳失敗: {e}")
+        log_message(f"❌ SFTP 上傳失敗: {e}")
 
 if __name__ == "__main__":
-    convert_yt_info()  # 轉換頻道連結
-    process_yt_info()  # 解析 M3U8
-    upload_files()  # 上傳 SFTP
+    log_message("🔍 開始執行 yt_m.py")
+    convert_yt_info()
+    parse_m3u8()
+    upload_sftp()
+    log_message("✅ yt_m.py 執行完成")
