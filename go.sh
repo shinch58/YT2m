@@ -1,29 +1,23 @@
 #!/bin/bash
-set -e  # 遇到錯誤立即停止
+
+set -e
 
 echo "🚀 開始執行 go.sh"
 
-# 檢查必要環境變數
-if [[ -z "$Y_1" || -z "$Y_2" || -z "$Y_3" ]]; then
-    echo "❌ 缺少 YouTube API 金鑰"
-    exit 1
-fi
-
-# 安裝依賴
-pip install -U yt-dlp requests paramiko
-
-# 執行 yt_m.py
+# 執行 yt_m.py 解析 M3U8
 python3 scripts/yt_m.py
 
 # 確保 Git 設置正確
 git config --global user.name "github-actions"
 git config --global user.email "github-actions@github.com"
 
-# 檢查 output 變更並提交
+# 檢查 output 目錄是否有變更
 if [[ -n "$(git status --porcelain output/)" ]]; then
+    echo "📂 偵測到 output 變更，開始提交..."
     git add output/
     git commit -m "🔄 更新 M3U8 文件 $(date '+%Y-%m-%d %H:%M:%S')"
     git push origin main
+    echo "✅ 變更已提交至 GitHub"
+else
+    echo "ℹ️ output 目錄沒有變更，不進行提交"
 fi
-
-echo "✅ go.sh 執行完成"
