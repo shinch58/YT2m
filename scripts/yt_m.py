@@ -1,69 +1,53 @@
-import os
+import re
 import requests
+import json
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-YT_INFO_PATH = os.path.join(BASE_DIR, "../yt_info.txt")
-TMP_INFO_PATH = os.path.join(BASE_DIR, "../tmp_inf.txt")
-OUTPUT_DIR = os.path.join(BASE_DIR, "../output/")
-
-def grab_m3u8(youtube_url):
-    """取得 YouTube HLS M3U8 連結"""
-    if "watch?v=" in youtube_url:
-        video_id = youtube_url.split("watch?v=")[-1]
-        return f"https://manifest.googlevideo.com/api/manifest/hls_variant/id/{video_id}"
+def get_video_id(channel_url):
+    """ 從 YouTube 頻道 URL 取得直播影片 ID """
+    api_url = f"https://www.googleapis.com/youtube/v3/search?part=id&channelId={channel_url}&eventType=live&type=video&key=YOUR_YOUTUBE_API_KEY"
+    response = requests.get(api_url)
+    data = response.json()
+    
+    if "items" in data and len(data["items"]) > 0:
+        return data["items"][0]["id"]["videoId"]
     return None
 
-def generate_m3u8():
-    """根據 tmp_inf.txt 生成 M3U8"""
-    if not os.path.exists(TMP_INFO_PATH):
-        print(f"❌ 找不到 {TMP_INFO_PATH}")
-        return
+def extract_full_m3u8(video_url):
+    """ 解析 YouTube 直播頁面 HTML 以獲取完整 M3U8 連結 """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+    }
+    html = requests.get(video_url, headers=headers).text
+    match = re.search(r'(https://manifest\.googlevideo\.com/[^"]+index\.m3u8)', html)
+    return match.group(1) if match else None
 
-    with open(TMP_INFO_PATH, "r", encoding="utf-8") as f:
-        lines = f.readlines()
+def main():
+    """ 主程式 """
+    channels = [
+        "https://www.youtube.com/@bdtvbest/live",
+        "https://www.youtube.com/@chengsin94/live"
+    ]
 
-    if not lines:
-        print("❌ tmp_inf.txt 內容為空，無法生成 M3U8")
-        return
-
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    index = 1
-    updated = False
-    for i in range(0, len(lines), 2):
-        if i + 1 >= len(lines):
+    results = []
+    for channel_url in channels:
+        print(f"🔍 解析 {channel_url} ...")
+        
+        video_id = get_video_id(channel_url)
+        if not video_id:
+            print(f"❌ 無法找到直播影片: {channel_url}")
             continue
+        
+        video_url = f"https://www.youtube.com/watch?v={video_id}"
+        m3u8_url = extract_full_m3u8(video_url)
 
-        metadata = lines[i].strip()
-        youtube_url = lines[i + 1].strip()
-        hls_url = grab_m3u8(youtube_url)
+        if m3u8_url:
+            print(f"✅ 找到 M3U8: {m3u8_url}")
+            results.append({"channel": channel_url, "m3u8": m3u8_url})
+        else:
+            print(f"❌ 未找到 M3U8: {video_url}")
 
-        if not hls_url:
-            print(f"⚠️ 無法解析 M3U8: {youtube_url}")
-            continue
-
-        m3u8_filename = f"y{index:02d}.m3u8"
-        php_filename = f"y{index:02d}.php"
-        m3u8_path = os.path.join(OUTPUT_DIR, m3u8_filename)
-        php_path = os.path.join(OUTPUT_DIR, php_filename)
-
-        with open(m3u8_path, "w", encoding="utf-8") as m3u8_file:
-            m3u8_file.write("#EXTM3U\n")
-            m3u8_file.write("#EXT-X-STREAM-INF:BANDWIDTH=1280000\n")
-            m3u8_file.write(hls_url + "\n")
-
-        with open(php_path, "w", encoding="utf-8") as php_file:
-            php_file.write(f"<?php\n")
-            php_file.write(f"    header('Location: {hls_url}');\n")
-            php_file.write("?>\n")
-
-        print(f"✅ 生成 {m3u8_filename} 和 {php_filename}")
-        updated = True
-        index += 1
-
-    if not updated:
-        print("ℹ️ 沒有新的 M3U8 生成")
-
+    with open("m3u8_list.json", "w") as f:
+        json.dump(results, f, indent=4)
 
 if __name__ == "__main__":
-    generate_m3u8()
+    main()
