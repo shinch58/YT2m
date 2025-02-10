@@ -1,0 +1,382 @@
+[2025-02-10 05:37:54] 🔑 使用 API 金鑰: (隱藏)
+[2025-02-10 05:37:54] 🔍 API 回應: {
+  "kind": "youtube#searchListResponse",
+  "etag": "gq_JmgLF7I2Q2FKJWPHdnwIqHGE",
+  "nextPageToken": "CAUQAA",
+  "regionCode": "US",
+  "pageInfo": {
+    "totalResults": 1000000,
+    "resultsPerPage": 5
+  },
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "L76A3qTBET7Cr1V32mVPCpDJ0IE",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "RlcOMdXG3FY"
+      },
+      "snippet": {
+        "publishedAt": "2025-02-10T00:02:45Z",
+        "channelId": "UCu3sKtOW9TGaErPsAYVPplA",
+        "title": "LIVE: Dateline 24/7",
+        "description": "Stream Dateline 24 hours a day, 7 days a week on the @DatelineNBC YouTube channel. Discover top true crime picks from The ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/RlcOMdXG3FY/default_live.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/RlcOMdXG3FY/mqdefault_live.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/RlcOMdXG3FY/hqdefault_live.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "Dateline NBC",
+        "liveBroadcastContent": "live",
+        "publishTime": "2025-02-10T00:02:45Z"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "ezhNKslEJUroJsqHdlVol6ocDiE",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "qc6gRkIMaMA"
+      },
+      "snippet": {
+        "publishedAt": "2025-02-09T12:22:26Z",
+        "channelId": "UCYPvAwZP8pZhSMW8qs7cVCw",
+        "title": "LIVE: Prashant Kishor Exclusive On Delhi Election Results &amp; Arvind Kejriwal&#39;s Downfall In Delhi",
+        "description": "LIVE: Prashant Kishor Exclusive On Delhi Election Results & Arvind Kejriwal's Downfall In Delhi AAP chief and former Delhi Chief ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/qc6gRkIMaMA/default_live.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/qc6gRkIMaMA/mqdefault_live.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/qc6gRkIMaMA/hqdefault_live.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "India Today",
+        "liveBroadcastContent": "live",
+        "publishTime": "2025-02-09T12:22:26Z"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "DLS-ciMSnAh1STnlXCFiFkZPTLc",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "PHzlVBPbdw4"
+      },
+      "snippet": {
+        "publishedAt": "2025-02-09T15:18:52Z",
+        "channelId": "UCtFQDgA8J8_iiwc5-KoAQlg",
+        "title": "LIVE: President Trump arrives in New Orleans I Super Bowl I USA I America I NFL I Football",
+        "description": "LIVE: President Trump arrives in New Orleans I Super Bowl I USA I America I NFL I Football #trump #usa #football #superbowl ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/PHzlVBPbdw4/default_live.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/PHzlVBPbdw4/mqdefault_live.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/PHzlVBPbdw4/hqdefault_live.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "ANI News",
+        "liveBroadcastContent": "live",
+        "publishTime": "2025-02-09T15:18:52Z"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "2RviHqUPqlnRopQAswY3Zo2fXB4",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "CgyOfJKssdc"
+      },
+      "snippet": {
+        "publishedAt": "2025-02-09T11:39:13Z",
+        "channelId": "UCJg9wBPyKMNA5sRDnvzmkdg",
+        "title": "News and Headlines across the country, Philadelphia Eagles celebrate Super Bowl Win",
+        "description": "New Orleans: The Kansas City Chiefs are chasing history with an unprecedented Super Bowl 'three-peat.' The Chiefs will face off ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/CgyOfJKssdc/default_live.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/CgyOfJKssdc/mqdefault_live.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/CgyOfJKssdc/hqdefault_live.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "LiveNOW from FOX",
+        "liveBroadcastContent": "live",
+        "publishTime": "2025-02-09T11:39:13Z"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "ETq6qNZFHHrgfKHOkV5e-tfLaR0",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "KxbkuL20TX4"
+      },
+      "snippet": {
+        "publishedAt": "2025-02-09T06:36:26Z",
+        "channelId": "UC_gUM8rL-Lrg6O3adPW9K1g",
+        "title": "Caribbean Sea Tsunami LIVE: 7.6 Earthquake In Caribbean Sea | Cayman Island Earthquake | WION LIVE",
+        "description": "A major magnitude 7.6 earthquake struck the Caribbean Sea on Saturday, around 130 miles (209 kilometers) south-southwest of ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/KxbkuL20TX4/default_live.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/KxbkuL20TX4/mqdefault_live.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/KxbkuL20TX4/hqdefault_live.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "WION",
+        "liveBroadcastContent": "live",
+        "publishTime": "2025-02-09T06:36:26Z"
+      }
+    }
+  ]
+}
+
+[2025-02-10 05:37:54] ✅ 解析成功: https://www.youtube.com/@bdtvbest/live → https://www.youtube.com/watch?v=RlcOMdXG3FY
+[2025-02-10 05:37:54] 🔑 使用 API 金鑰: (隱藏)
+[2025-02-10 05:37:55] 🔍 API 回應: {
+  "kind": "youtube#searchListResponse",
+  "etag": "gq_JmgLF7I2Q2FKJWPHdnwIqHGE",
+  "nextPageToken": "CAUQAA",
+  "regionCode": "US",
+  "pageInfo": {
+    "totalResults": 1000000,
+    "resultsPerPage": 5
+  },
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "L76A3qTBET7Cr1V32mVPCpDJ0IE",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "RlcOMdXG3FY"
+      },
+      "snippet": {
+        "publishedAt": "2025-02-10T00:02:45Z",
+        "channelId": "UCu3sKtOW9TGaErPsAYVPplA",
+        "title": "LIVE: Dateline 24/7",
+        "description": "Stream Dateline 24 hours a day, 7 days a week on the @DatelineNBC YouTube channel. Discover top true crime picks from The ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/RlcOMdXG3FY/default_live.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/RlcOMdXG3FY/mqdefault_live.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/RlcOMdXG3FY/hqdefault_live.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "Dateline NBC",
+        "liveBroadcastContent": "live",
+        "publishTime": "2025-02-10T00:02:45Z"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "ezhNKslEJUroJsqHdlVol6ocDiE",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "qc6gRkIMaMA"
+      },
+      "snippet": {
+        "publishedAt": "2025-02-09T12:22:26Z",
+        "channelId": "UCYPvAwZP8pZhSMW8qs7cVCw",
+        "title": "LIVE: Prashant Kishor Exclusive On Delhi Election Results &amp; Arvind Kejriwal&#39;s Downfall In Delhi",
+        "description": "LIVE: Prashant Kishor Exclusive On Delhi Election Results & Arvind Kejriwal's Downfall In Delhi AAP chief and former Delhi Chief ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/qc6gRkIMaMA/default_live.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/qc6gRkIMaMA/mqdefault_live.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/qc6gRkIMaMA/hqdefault_live.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "India Today",
+        "liveBroadcastContent": "live",
+        "publishTime": "2025-02-09T12:22:26Z"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "DLS-ciMSnAh1STnlXCFiFkZPTLc",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "PHzlVBPbdw4"
+      },
+      "snippet": {
+        "publishedAt": "2025-02-09T15:18:52Z",
+        "channelId": "UCtFQDgA8J8_iiwc5-KoAQlg",
+        "title": "LIVE: President Trump arrives in New Orleans I Super Bowl I USA I America I NFL I Football",
+        "description": "LIVE: President Trump arrives in New Orleans I Super Bowl I USA I America I NFL I Football #trump #usa #football #superbowl ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/PHzlVBPbdw4/default_live.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/PHzlVBPbdw4/mqdefault_live.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/PHzlVBPbdw4/hqdefault_live.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "ANI News",
+        "liveBroadcastContent": "live",
+        "publishTime": "2025-02-09T15:18:52Z"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "2RviHqUPqlnRopQAswY3Zo2fXB4",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "CgyOfJKssdc"
+      },
+      "snippet": {
+        "publishedAt": "2025-02-09T11:39:13Z",
+        "channelId": "UCJg9wBPyKMNA5sRDnvzmkdg",
+        "title": "News and Headlines across the country, Philadelphia Eagles celebrate Super Bowl Win",
+        "description": "New Orleans: The Kansas City Chiefs are chasing history with an unprecedented Super Bowl 'three-peat.' The Chiefs will face off ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/CgyOfJKssdc/default_live.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/CgyOfJKssdc/mqdefault_live.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/CgyOfJKssdc/hqdefault_live.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "LiveNOW from FOX",
+        "liveBroadcastContent": "live",
+        "publishTime": "2025-02-09T11:39:13Z"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "ETq6qNZFHHrgfKHOkV5e-tfLaR0",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "KxbkuL20TX4"
+      },
+      "snippet": {
+        "publishedAt": "2025-02-09T06:36:26Z",
+        "channelId": "UC_gUM8rL-Lrg6O3adPW9K1g",
+        "title": "Caribbean Sea Tsunami LIVE: 7.6 Earthquake In Caribbean Sea | Cayman Island Earthquake | WION LIVE",
+        "description": "A major magnitude 7.6 earthquake struck the Caribbean Sea on Saturday, around 130 miles (209 kilometers) south-southwest of ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/KxbkuL20TX4/default_live.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/KxbkuL20TX4/mqdefault_live.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/KxbkuL20TX4/hqdefault_live.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "WION",
+        "liveBroadcastContent": "live",
+        "publishTime": "2025-02-09T06:36:26Z"
+      }
+    }
+  ]
+}
+
+[2025-02-10 05:37:55] ✅ 解析成功: https://www.youtube.com/@chengsin94/live → https://www.youtube.com/watch?v=RlcOMdXG3FY
+[2025-02-10 05:37:55] ✅ 轉換完成，儲存至 tmp_inf.txt
+[2025-02-10 05:37:57] 🚀 啟動 SFTP 上傳程序...
+[2025-02-10 05:38:00] ⬆️ 上傳 output/y08.php → /shinch.atwebpages.com/y08.php
+[2025-02-10 05:38:00] ⬆️ 上傳 output/y02.php → /shinch.atwebpages.com/y02.php
+[2025-02-10 05:38:01] ⬆️ 上傳 output/y05.m3u8 → /shinch.atwebpages.com/y05.m3u8
+[2025-02-10 05:38:01] ⬆️ 上傳 output/y01.m3u8 → /shinch.atwebpages.com/y01.m3u8
+[2025-02-10 05:38:02] ⬆️ 上傳 output/y08.m3u8 → /shinch.atwebpages.com/y08.m3u8
+[2025-02-10 05:38:02] ⬆️ 上傳 output/api_log.txt → /shinch.atwebpages.com/api_log.txt
+[2025-02-10 05:38:03] ⬆️ 上傳 output/y02.m3u8 → /shinch.atwebpages.com/y02.m3u8
+[2025-02-10 05:38:04] ⬆️ 上傳 output/y05.php → /shinch.atwebpages.com/y05.php
+[2025-02-10 05:38:04] ⬆️ 上傳 output/y01.php → /shinch.atwebpages.com/y01.php
+[2025-02-10 05:38:04] ✅ SFTP 上傳完成！
