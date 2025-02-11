@@ -9,15 +9,21 @@ yt_info_path = "yt_info.txt"
 output_dir = "output"
 cookies_path = os.path.join(os.getcwd(), "cookies.txt")
 
-# SFTP 設定
-SFTP_HOST = os.getenv("SFTP_HOST", "your_sftp_server.com")
-SFTP_PORT = int(os.getenv("SFTP_PORT", 221))
-SFTP_USER = os.getenv("SFTP_USER", "your_username")
-SFTP_PASSWORD = os.getenv("SFTP_PASSWORD", "your_password")  # 使用密碼登入
-SFTP_REMOTE_DIR = os.getenv("SFTP_REMOTE_DIR", "/remote/path/")
+# 從環境變數讀取 SFTP 連線資訊
+SF_L = os.getenv("SF_L", "")
 
-# 讀取 API 金鑰
-YT_API_KEYS = [os.getenv(f"Y_{i}", "") for i in range(1, 4)]
+if not SF_L:
+    print("❌ 環境變數 SF_L 未設置")
+    exit(1)
+
+# 解析 SFTP URL
+parsed_url = urlparse(SF_L)
+
+SFTP_HOST = parsed_url.hostname
+SFTP_PORT = parsed_url.port if parsed_url.port else 22  # 預設 SFTP 端口 22
+SFTP_USER = parsed_url.username
+SFTP_PASSWORD = parsed_url.password
+SFTP_REMOTE_DIR = parsed_url.path if parsed_url.path else "/"  # 取得路徑部分
 
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
