@@ -67,11 +67,3 @@ jobs:
           else
             echo "ℹ️ output 目錄沒有變更，不進行提交"
           fi
-
-      # Set timezone and update timestamp
-      - name: Set timezone and update timestamp
-        run: |
-          export TZ=Asia/Taipei
-          echo "$(date '+%m/%d/%Y %H:%M:%S %Z')" > scripts/timestamp.txt
-          echo "✅ 時間戳已更新"
-          
