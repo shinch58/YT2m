@@ -11,7 +11,7 @@ cookies_path = os.path.join(os.getcwd(), "cookies.txt")
 
 # SFTP 設定
 SFTP_HOST = os.getenv("SFTP_HOST", "your_sftp_server.com")
-SFTP_PORT = int(os.getenv("SFTP_PORT", 22))
+SFTP_PORT = int(os.getenv("SFTP_PORT", 221))
 SFTP_USER = os.getenv("SFTP_USER", "your_username")
 SFTP_PASSWORD = os.getenv("SFTP_PASSWORD", "your_password")  # 使用密碼登入
 SFTP_REMOTE_DIR = os.getenv("SFTP_REMOTE_DIR", "/remote/path/")
@@ -22,21 +22,10 @@ YT_API_KEYS = [os.getenv(f"Y_{i}", "") for i in range(1, 4)]
 # 確保輸出目錄存在
 os.makedirs(output_dir, exist_ok=True)
 
-# 檢查 cookies.txt
-if not os.path.exists(cookies_path):
-    print(f"❌ 找不到 cookies.txt ({cookies_path})")
-
 def decode_and_save_cookies():
     """解碼並保存 cookies.txt"""
     yt_cookies_b64 = os.getenv("YT_COOKIE_B64")
-    if yt_cookies_b64:
-        cookies_data = base64.b64decode(yt_cookies_b64).decode('utf-8')
-        with open(cookies_path, 'w', encoding='utf-8') as f:
-            f.write(cookies_data)
-        print("✅ cookies.txt 已生成")
-    else:
-        print("❌ 環境變數 YT_COOKIE_B64 未設置")
-
+    
 def grab(youtube_url):
     """使用 yt-dlp 解析 M3U8 連結"""
     yt_dlp_cmd = f"yt-dlp --geo-bypass --cookies cookies.txt --sleep-requests 1 --limit-rate 500k --retries 5 --fragment-retries 10 --no-warnings --quiet --no-check-certificate --no-playlist -g {youtube_url}"
@@ -75,7 +64,7 @@ def process_yt_info():
 
             # 生成 PHP 文件
             php_content = f"""<?php
-    header('Location: {m3u8_url}');
+header('Location: {m3u8_url}');
 ?>"""
             output_php = os.path.join(output_dir, f"y{i:02d}.php")
             with open(output_php, "w", encoding="utf-8") as f:
@@ -88,6 +77,7 @@ def upload_files():
     """使用 SFTP 上傳 M3U8 檔案"""
     print("🚀 啟動 SFTP 上傳程序...")
     try:
+        
         transport = paramiko.Transport((SFTP_HOST, SFTP_PORT))
         transport.connect(username=SFTP_USER, password=SFTP_PASSWORD)
         sftp = paramiko.SFTPClient.from_transport(transport)
@@ -106,6 +96,7 @@ def upload_files():
         for file in os.listdir(output_dir):
             local_path = os.path.join(output_dir, file)
             remote_path = os.path.join(SFTP_REMOTE_DIR, file)
+            print(f"Local file: {local_path}")
             if os.path.isfile(local_path):
                 print(f"⬆️ 上傳 {local_path} → {remote_path}")
                 sftp.put(local_path, remote_path)
