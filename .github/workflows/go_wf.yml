@@ -5,9 +5,12 @@ on:
     - cron: "5 4 * * *"  # 每天中午 12:05 UTC+8 (UTC時間 04:05)
     - cron: "5 */3 * * *" # 每3小時更新一次
   workflow_dispatch:  # 手動觸發
+
 jobs:
   update_m3u8:
     runs-on: ubuntu-latest
+    env:
+      SF_L: ${{ secrets.SF_L }}  # 設定環境變數 SF_L，來自 GitHub Secrets
 
     steps:
       # Checkout the repository
@@ -20,14 +23,15 @@ jobs:
         with:
           python-version: 3.8
 
+      # Install dependencies
       - name: Install dependencies
         run: |
-         pip install -U yt-dlp paramiko
+          pip install -U yt-dlp paramiko
 
       # Decode YT_COOKIE_B64 and generate cookies.txt
       - name: Output YT_COOKIE_B64 to cookie01.txt
         run: echo "${{ secrets.YT_COOKIE_B64 }}" | base64 --decode > cookie01.txt 
-      
+
       - name: Decode and generate cookies.txt
         run: |
           if [ -z "${{ secrets.YT_COOKIE_B64 }}" ]; then
