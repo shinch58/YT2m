@@ -141,4 +141,3 @@ def upload_files():
 if __name__ == "__main__":
     process_yt_info()
     upload_files()
-
