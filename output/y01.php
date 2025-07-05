@@ -1,3 +1,3 @@
 <?php
-header('Location: https://manifest.googlevideo.com/api/manifest/hls_variant/expire/1751733980/ei/fAJpaOuxAdiV2_gPjrH9qA8/ip/20.25.193.238/id/bkfvI6oJgs0.1/source/yt_live_broadcast/requiressl/yes/xpc/EgVo2aDSNQ%3D%3D/hfr/1/maxh/4320/playlist_duration/30/manifest_duration/30/maudio/1/siu/1/bui/AY1jyLNNvtnd91I-fkDoDUGhgb8g9F_h0U3owq3o13y1vY7yuiA3ldqAmMhgP8gxvRFAXGhcAA/spc/l3OVKXst0F8d7kTxhRPUQROidohxyEh40jQLMLukuejrjEey7xTk9aBhd3x7EHpYY5NhdC_Wg-y1PfHs8cc/vprv/1/go/1/rqh/5/pacing/0/nvgoi/1/ncsapi/1/keepalive/yes/fexp/51355912/dover/11/itag/0/playlist_type/DVR/sparams/expire%2Cei%2Cip%2Cid%2Csource%2Crequiressl%2Cxpc%2Chfr%2Cmaxh%2Cplaylist_duration%2Cmanifest_duration%2Cmaudio%2Csiu%2Cbui%2Cspc%2Cvprv%2Cgo%2Crqh%2Citag%2Cplaylist_type/sig/AJfQdSswRgIhAO3K5A_xQNP6__xIWkJMq6dvdZsPCYDp7pd5KVdz5pA4AiEAvjR6uu13JMrbhvwK2Zu1zh18OXejxO5EW1EIbPJJMk8%3D/file/index.m3u8');
+header('Location: https://raw.githubusercontent.com/jz168k/YT2m/main/assets/no_s.m3u8');
 ?>
