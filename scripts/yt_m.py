@@ -3,7 +3,7 @@ import re
 import httpx
 import paramiko
 import json
-import yt_dlp
+import subprocess
 from urllib.parse import urlparse
 
 yt_info_path = "yt_info.txt"
@@ -28,7 +28,6 @@ SFTP_REMOTE_DIR = parsed_url.path if parsed_url.path else "/"
 os.makedirs(output_dir, exist_ok=True)
 
 def get_channel_id(youtube_url):
-    """從 YouTube URL 提取頻道 ID，優先使用 API"""
     handle = youtube_url.split("/")[-2] if "/@" in youtube_url else None
     if API_KEY and handle:
         try:
@@ -44,14 +43,12 @@ def get_channel_id(youtube_url):
         except Exception as e:
             print(f"⚠️ API 獲取頻道 ID 失敗: {e}")
 
-    # 回退到 HTML 解析
     try:
         with httpx.Client(http2=True, follow_redirects=True, timeout=15) as client:
             headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                "Accept": "text/html",
                 "Accept-Language": "en-US,en;q=0.5",
-                "Connection": "keep-alive"
             }
             res = client.get(youtube_url, headers=headers)
             html = res.text
@@ -72,7 +69,6 @@ def get_channel_id(youtube_url):
         return None
 
 def get_live_video_id(channel_id):
-    """使用 YouTube Data API 獲取直播 videoId"""
     try:
         url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={channel_id}&eventType=live&type=video&key={API_KEY}"
         with httpx.Client(timeout=15) as client:
@@ -89,34 +85,98 @@ def get_live_video_id(channel_id):
         print(f"⚠️ API 請求失敗: {e}")
         return None
 
-def grab(youtube_url):
-    """使用 yt-dlp 抓取 m3u8 直播流"""
+def grab_by_ytdlp(youtube_url):
+    """使用 yt-dlp 嘗試抓取 720p 以下的 m3u8 串流"""
+
+    yt_header_auth = os.getenv("YT_HEADER_AUTH", "")
+    headers = []
+    if yt_header_auth:
+        try:
+            key, value = yt_header_auth.split(":", 1)
+            headers = ["--add-header", f"{key.strip()}:{value.strip()}"]
+            print("🛡️ 使用 Authorization header 傳入 yt-dlp")
+        except Exception as e:
+            print(f"⚠️ YT_HEADER_AUTH 格式錯誤: {e}")
+
+    if not headers and not os.path.exists(cookies_path):
+        print("⚠️ 未設置 Authorization header，也找不到 cookies.txt，yt-dlp 可能會失敗")
+
+    cmd = [
+        "yt-dlp",
+        "-f", "best[ext=m3u8][height<=720]",
+        *headers
+    ]
+
+    if not headers:
+        cmd += ["--cookies", cookies_path]
+
+    cmd.append(youtube_url)
+
     try:
-        ydl_opts = {
-            'format': 'best',  # 選擇最佳格式（通常包含 m3u8）
-            'cookiesfrombrowser': None,  # 若無需 Cookies 可設為 None
-            'quiet': True,  # 減少日誌輸出
-            'no_warnings': True,  # 隱藏警告
-            'extract_flat': False,  # 提取完整資訊
-            'force_generic_extractor': False,
+        print("⚙️ 執行 yt-dlp:", " ".join(cmd))
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=30)
+        if result.returncode == 0:
+            m3u8_url = result.stdout.strip()
+            if ".m3u8" in m3u8_url:
+                print(f"✅ yt-dlp 成功取得 .m3u8: {m3u8_url}")
+                return m3u8_url
+            else:
+                print("⚠️ yt-dlp 回傳非 .m3u8 連結")
+        else:
+            print(f"⚠️ yt-dlp 解析失敗: {result.stderr}")
+    except Exception as e:
+        print(f"⚠️ 執行 yt-dlp 發生錯誤: {e}")
+    return None
+
+def grab(youtube_url):
+    with httpx.Client(http2=True, follow_redirects=True, timeout=15) as client:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Accept": "text/html",
+            "Accept-Language": "en-US,en;q=0.5",
         }
 
-        # 如果存在 Cookies 檔案，加入 yt-dlp 選項
+        cookies = {}
         if os.path.exists(cookies_path):
-            ydl_opts['cookiefile'] = cookies_path
+            try:
+                with open(cookies_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if not line.startswith('#') and '\t' in line:
+                            parts = line.strip().split('\t')
+                            if len(parts) >= 6:
+                                cookies[parts[5]] = parts[6]
+            except Exception as e:
+                print(f"⚠️ Cookie 讀取失敗: {e}")
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(youtube_url, download=False)  # 不下載，只提取資訊
-            hls_url = info.get('url')  # 提取 m3u8 連結
-            if hls_url and '.m3u8' in hls_url:
-                print(f"✅ 找到 .m3u8 連結: {hls_url}")
-                return hls_url
-            else:
-                print(f"⚠️ 未找到有效的 .m3u8 連結，可能非直播或無權限")
+        try:
+            res = client.get(youtube_url, headers=headers, cookies=cookies)
+            html = res.text
+
+            if 'noindex' in html:
+                print(f"⚠️ 頻道 {youtube_url} 目前未開啟直播")
                 return None
-    except Exception as e:
-        print(f"⚠️ yt-dlp 提取 m3u8 失敗: {e}")
-        return None
+
+            player_response_match = re.search(r'ytInitialPlayerResponse\s*=\s*({.*?});', html, re.DOTALL)
+            if player_response_match:
+                player_response = json.loads(player_response_match.group(1))
+                streaming_data = player_response.get("streamingData", {})
+                hls_formats = streaming_data.get("hlsManifestUrl", "")
+                if hls_formats:
+                    print(f"✅ 找到 .m3u8 連結: {hls_formats}")
+                    return hls_formats
+
+            m3u8_matches = re.findall(r'(https://[^"]+\.m3u8[^"]*)', html)
+            for url in m3u8_matches:
+                if "googlevideo.com" in url:
+                    print(f"✅ 找到 .m3u8 連結: {url}")
+                    return url
+
+            print("⚠️ 未找到有效的 .m3u8 連結，嘗試 yt-dlp 備援解析")
+            return grab_by_ytdlp(youtube_url) or "https://raw.githubusercontent.com/jz168k/YT2m/main/assets/no_s.m3u8"
+
+        except Exception as e:
+            print(f"⚠️ 抓取頁面失敗: {e}")
+            return grab_by_ytdlp(youtube_url) or "https://raw.githubusercontent.com/jz168k/YT2m/main/assets/no_s.m3u8"
 
 def process_yt_info():
     with open(yt_info_path, "r", encoding="utf-8") as f:
@@ -134,25 +194,22 @@ def process_yt_info():
             youtube_url = line
             print(f"🔍 嘗試解析 M3U8: {youtube_url}")
 
-            # 提取頻道 ID
             channel_id = get_channel_id(youtube_url)
             if not channel_id:
                 print(f"⚠️ 跳過 {youtube_url}，無法獲取頻道 ID")
                 continue
 
-            # 使用 API 獲取直播 URL
             if API_KEY:
                 live_url = get_live_video_id(channel_id)
                 if not live_url:
                     print(f"⚠️ 頻道 {youtube_url} 無直播，跳過")
                     continue
             else:
-                live_url = youtube_url  # 無 API 金鑰時回退到原始 URL
+                live_url = youtube_url
 
-            # 抓取 m3u8
             m3u8_url = grab(live_url)
             if m3u8_url is None:
-                m3u8_url = "https://raw.githubusercontent.com/jz168k/YT2m/main/assets/no_s.m3u8"
+                continue
 
             m3u8_content = f"#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1280000\n{m3u8_url}\n"
             output_m3u8 = os.path.join(output_dir, f"y{i:02d}.m3u8")
