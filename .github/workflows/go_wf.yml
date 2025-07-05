@@ -13,8 +13,9 @@ jobs:
   update_m3u8:
     runs-on: ubuntu-latest
     env:
-      SF_L: ${{ secrets.SF_L }}
-      YT_API_KEY: ${{ secrets.YT_API_KEY }}
+  SF_L: ${{ secrets.SF_L }}
+  YT_API_KEY: ${{ secrets.YT_API_KEY }}
+  YT_HEADER_AUTH: ${{ secrets.YT_HEADER_AUTH }}
 
     steps:
       - name: 📥 Checkout repository
@@ -29,8 +30,7 @@ jobs:
         run: |
           pip install -U yt-dlp httpx[http2] paramiko
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
-          echo "✅ 已安裝 yt-dlp、httpx、paramiko 和 ffmpeg"
+          echo "✅ 已安裝 yt-dlp、httpx、paramiko "
 
       - name: 🔐 Combine Base64 cookie segments into cookies.b64
         run: |
