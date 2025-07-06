@@ -2,12 +2,13 @@ name: Auto M3U8 Update
 
 on:
   schedule:
-    - cron: "0 */3 * * *"
-  workflow_dispatch:
+    #- cron: "0 */3 * * *"  # 每 3 小時執行一次
+  workflow_dispatch:       # 可手動執行
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -20,19 +21,18 @@ jobs:
       - name: Install requests
         run: pip install requests
 
-      - name: Run yt_m.py
-        
-echo "🚀 執行 scripts/yt_m.py"
-python3 scripts/yt_m.py
+      - name: Run yt_m.py and auto commit
+        run: |
+          echo "🚀 執行 scripts/yt_m.py"
+          python3 scripts/yt_m.py
 
-if [[ `git status --porcelain` ]]; then
-  echo "📦 有變更，自動提交"
-  git config --global user.email "github-actions@github.com"
-  git config --global user.name "github-actions"
-  git add output/
-  git commit -m "🔁 自動更新 output/（4gtv）"
-  git push
-else
-  echo "✅ 無變更，不提交"
-fi
-    
+          if [[ `git status --porcelain` ]]; then
+            echo "📦 有變更，自動提交"
+            git config --global user.email "github-actions@github.com"
+            git config --global user.name "github-actions"
+            git add output/
+            git commit -m "🔁 自動更新 output/（4gtv）"
+            git push
+          else
+            echo "✅ 無變更，不提交"
+          fi
