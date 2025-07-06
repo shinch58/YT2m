@@ -1,10 +1,10 @@
 name: Auto M3U8 Update
 
 on:
-  schedule:
+  #schedule:
     #- cron: "0 */3 * * *"  # 每 3 小時執行一次
-  workflow_dispatch:       # 可手動執行
-
+  workflow_dispatch: {}     # 手動觸發（需要加上 {}）
+  
 jobs:
   build:
     runs-on: ubuntu-latest
