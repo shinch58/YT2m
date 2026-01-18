@@ -2,8 +2,9 @@ name: Auto Update File to GitHub
 
 on:
   schedule:
-    
-  workflow_dispatch:
+    - cron: '0 */3 * * *'  # 每 3 小時自動執行一次 (00:00, 03:00, 06:00...)
+  workflow_dispatch:      # 保留手動執行按鈕
+
 jobs:
   update_m3u8:
     runs-on: ubuntu-latest
