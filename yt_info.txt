@@ -1,8 +1,17 @@
 ~~ DO NOT EDIT THE FIRST 2 LINES
 ~~ FORMAT: <channel name> | <group name> | <logo> | <tvg-id>
 
-寶島文化台 | YouTube | |
-https://www.youtube.com/@bdtvbest/live
+iNews | YouTube | |
+https://www.youtube.com/watch?v=pF507BLtbqU
 
-誠心電視台 | YouTube | |
-https://www.youtube.com/@chengsin94/live
+非凡台北 | YouTube | |
+https://www.youtube.com/watch?v=HtUVepidg7c
+
+非凡台中
+https://www.youtube.com/watch?v=EZ8GQ8hH6GI
+
+非凡高雄
+https://www.youtube.com/watch?v=Qx-PTaNRC7Y
+
+lemon職人
+https://www.youtube.com/watch?v=uM1uNAhFNG0
