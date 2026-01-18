@@ -20,24 +20,20 @@ HEADERS = {
 NO_STREAM = "https://raw.githubusercontent.com/jz168k/YT2m/main/assets/no_s.m3u8"
 MAX_HEIGHT = 720   # 🔒 鎖定最高 720p
 
-
 # ---------- 工具 ----------
 
-def sha1(data: str) -> str:
+def sha1(data):
     return hashlib.sha1(data.encode("utf-8")).hexdigest()
-
 
 def safe_get(url, timeout=10):
     return requests.get(url, headers=HEADERS, timeout=timeout)
 
-
 def safe_head(url, timeout=5):
     return requests.head(url, headers=HEADERS, timeout=timeout, allow_redirects=True)
 
-
 # ---------- HTML 直抓 m3u8 ----------
 
-def grab_html_m3u8(youtube_url: str) -> str | None:
+def grab_html_m3u8(youtube_url):
     try:
         html = safe_get(youtube_url).text
     except Exception:
@@ -46,13 +42,11 @@ def grab_html_m3u8(youtube_url: str) -> str | None:
     m = re.search(r'https://manifest\.googlevideo\.com/[^"]+\.m3u8[^"]*', html)
     if m:
         return m.group(0)
-
     return None
-
 
 # ---------- master.m3u8 → 選最高 ≤720p ----------
 
-def select_720p_from_master(master_url: str) -> str | None:
+def select_720p_from_master(master_url):
     try:
         txt = safe_get(master_url).text
     except Exception:
@@ -76,10 +70,9 @@ def select_720p_from_master(master_url: str) -> str | None:
     streams.sort(reverse=True, key=lambda x: x[0])
     return streams[0][1]
 
-
 # ---------- 檔案處理 ----------
 
-def write_if_changed(path: str, content: str) -> bool:
+def write_if_changed(path, content):
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             old = f.read()
@@ -90,21 +83,11 @@ def write_if_changed(path: str, content: str) -> bool:
         f.write(content)
     return True
 
+def build_m3u8(target_url):
+    return "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1500000\n" + target_url + "\n"
 
-def build_m3u8(target_url: str) -> str:
-    return f"""#EXTM3U
-#EXT-X-STREAM-INF:BANDWIDTH=1500000
-{target_url}
-"""
-
-
-def build_php(target_url: str) -> str:
-    return f"""<?php
-header("Location: {target_url}");
-exit;
-?>
-"""
-
+def build_php(target_url):
+    return "<?php\nheader(\"Location: {}\");\nexit;\n?>".format(target_url)
 
 # ---------- 主流程 ----------
 
@@ -145,8 +128,8 @@ def main():
                     except Exception:
                         pass
 
-            out_m3u8 = os.path.join(OUTPUT_DIR, f"y{idx:02d}.m3u8")
-            out_php = os.path.join(OUTPUT_DIR, f"y{idx:02d}.php")
+            out_m3u8 = os.path.join(OUTPUT_DIR, "y{:02d}.m3u8".format(idx))
+            out_php = os.path.join(OUTPUT_DIR, "y{:02d}.php".format(idx))
 
             changed = False
             changed |= write_if_changed(out_m3u8, build_m3u8(final_m3u8))
@@ -161,7 +144,6 @@ def main():
             i += 1
 
     print("🎉 done")
-
 
 if __name__ == "__main__":
     main()
