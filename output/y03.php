@@ -1,3 +1,4 @@
 <?php
-header('Location: https://manifest.googlevideo.com/api/manifest/hls_variant/expire/1768740397/ei/zYFsaa2YB73avPEPsN_J8AI/ip/20.102.222.23/id/EZ8GQ8hH6GI.1/source/yt_live_broadcast/requiressl/yes/xpc/EgVo2aDSNQ==/hfr/1/maxh/4320/playlist_duration/30/manifest_duration/30/maudio/1/siu/1/bui/AW-iu_p8PLTRl6tGw_FpLPoGj5_RWp87rliz2UkvDevGBWBGp4twYNy3uCLwjlftfzJ2D2r-gg/spc/q5xjPFK1GlzS9VvWOTawMO_umccUe3_YXwywpSfLoiNK-FAbJ_65y2w/vprv/1/go/1/ns/X_G-IWge1Aawz-mT8fYxEu8R/rqh/5/pacing/0/nvgoi/1/ncsapi/1/keepalive/yes/fexp/51331020,51514994,51552689,51565116,51565681,51580968/dover/11/n/bo54wqs_QSSnoUI3xlK/itag/0/playlist_type/DVR/sparams/expire,ei,ip,id,source,requiressl,xpc,hfr,maxh,playlist_duration,manifest_duration,maudio,siu,bui,spc,vprv,go,ns,rqh,itag,playlist_type/sig/AJfQdSswRQIgEEQngt3E31nsZb_yCCf1Lw0dcNTUC2X6T1cAOLK_KlICIQC4Db6bsh_cFWYUzC5TStbINPX7J7vQXM-UoZndSObkGw==/file/index.m3u8');
+header("Location: https://raw.githubusercontent.com/jz168k/YT2m/main/assets/no_s.m3u8");
+exit;
 ?>
