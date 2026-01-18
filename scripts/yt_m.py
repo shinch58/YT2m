@@ -7,7 +7,6 @@ import json
 import requests
 from urllib.parse import urlparse
 
-# ===== 專案資料夾路徑 =====
 script_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(script_dir)
 
@@ -18,31 +17,28 @@ cookies_path = os.path.join(root_dir, 'cookies.txt')
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(log_dir, exist_ok=True)
 
-print(f"專案根目錄: {root_dir}")
-print(f"腳本目錄: {script_dir}")
+print("專案根目錄: " + root_dir)
+print("腳本目錄: " + script_dir)
 
-# ===== 日誌設置 =====
 logging.basicConfig(
     filename=os.path.join(log_dir, 'log.txt'),
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# ===== 從環境變數載入配置 =====
 YOUTUBE_API_KEY = os.getenv('YT_API_KEY', '')
 cookies_content = os.getenv('YT_COOKIES', '')
 
-# 寫入臨時 cookies.txt
 if cookies_content:
     with open(cookies_path, 'w', encoding='utf-8') as f:
         f.write(cookies_content)
-    print(f"已從環境變數載入 Cookies: {cookies_path}")
+    print("已載入 Cookies: " + cookies_path)
 else:
-    print("未找到 YT_COOKIES 環境變數")
+    print("無 YT_COOKIES 環境變數")
 
 SF_L = os.getenv('SF_L', '')
 if not SF_L:
-    print("缺少 SF_L 環境變數，請在 GitHub Secrets 設定")
+    print("缺少 SF_L 環境變數")
     logging.error("缺少 SF_L 環境變數")
     exit(1)
 
@@ -53,9 +49,8 @@ SFTP_USER = parsed_url.username
 SFTP_PASSWORD = parsed_url.password
 SFTP_REMOTE_DIR = parsed_url.path or "/"
 
-print(f"配置載入完成 (SFTP: {SFTP_HOST}:{SFTP_PORT})")
+print("配置載入完成 SFTP: " + SFTP_HOST + ":" + str(SFTP_PORT))
 
-# ===== 解析策略設置 =====
 USE_API_CHECK = False
 FORCE_PARSE = False
 SKIP_NON_LIVE = True
@@ -64,10 +59,8 @@ GEO_BYPASS = True
 GEO_BYPASS_COUNTRY = "TW"
 USE_IPV6 = False
 
-# ===== yt_info.txt 路徑 =====
 yt_info_path = os.path.join(root_dir, 'yt_info.txt')
 
-# ===== 輔助函數：提取 URL ID =====
 def extract_id_from_url(url):
     if 'v=' in url:
         return url.split('v=')[-1].split('&')[0], 'video'
@@ -75,7 +68,6 @@ def extract_id_from_url(url):
         return url.split('/channel/')[-1].split('/')[0], 'channel'
     return '', 'unknown'
 
-# ===== 使用 YouTube API 檢查直播狀態 =====
 def check_live_with_api(youtube_url):
     if not USE_API_CHECK or not YOUTUBE_API_KEY:
         return True, youtube_url
@@ -97,7 +89,7 @@ def check_live_with_api(youtube_url):
                 snippet = data['items'][0].get('snippet', {})
                 is_live = snippet.get('liveBroadcastContent') == 'live'
                 if is_live:
-                    print("API 確認為直播中")
+                    print("API 確認直播中")
                     return True, youtube_url
         
         elif id_type == 'channel':
@@ -114,16 +106,15 @@ def check_live_with_api(youtube_url):
             
             if 'items' in data and data['items']:
                 live_video_id = data['items'][0]['id']['videoId']
-                live_url = f"https://www.youtube.com/watch?v={live_video_id}"
-                print(f"API 找到直播影片: {live_video_id}")
+                live_url = "https://www.youtube.com/watch?v=" + live_video_id
+                print("API 找到直播: " + live_video_id)
                 return True, live_url
                 
     except Exception as e:
-        print(f"API 請求失敗: {e}")
+        print("API 失敗: " + str(e))
     
     return True, youtube_url
 
-# ===== 使用 yt-dlp 驗證直播狀態 =====
 def check_if_live_with_ytdlp(youtube_url):
     cmd = ["yt-dlp", "--dump-json", "--playlist-items", "1", "--no-warnings"]
     
@@ -140,35 +131,31 @@ def check_if_live_with_ytdlp(youtube_url):
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=30)
         info = json.loads(result.stdout)
-        
         is_live = info.get('is_live', False)
         live_status = info.get('live_status', 'not_live')
-        
         return is_live and live_status == 'is_live'
-            
     except:
         return False
 
-# ===== yt-dlp 解析 m3u8 =====
 def grab(youtube_url):
     is_live, corrected_url = check_live_with_api(youtube_url)
     
     if not is_live and not FORCE_PARSE:
         if not check_if_live_with_ytdlp(youtube_url):
-            logging.warning(f"跳過非直播 URL: {youtube_url}")
+            logging.warning("跳過非直播: " + youtube_url)
             return "https://raw.githubusercontent.com/jz168k/YT2m/main/assets/no_s.m3u8"
     
     youtube_url = corrected_url
     
     strategies = [
         {"name": "Android", "args": ["--extractor-args", "youtube:player_client=android"], "use_cookies": True},
-        {"name": "Android Embedded", "args": ["--extractor-args", "youtube:player_client=android_embedded"], "use_cookies": True},
+        {"name": "AndroidE", "args": ["--extractor-args", "youtube:player_client=android_embedded"], "use_cookies": True},
         {"name": "iOS", "args": ["--extractor-args", "youtube:player_client=ios"], "use_cookies": True},
-        {"name": "Web Embed", "args": ["--extractor-args", "youtube:player_client=web_embedded"], "use_cookies": True},
+        {"name": "Web", "args": ["--extractor-args", "youtube:player_client=web_embedded"], "use_cookies": True},
     ]
     
     for strategy in strategies:
-        print(f"策略: {strategy['name']}")
+        print("策略: " + strategy['name'])
         
         cmd = [
             "yt-dlp", "-f", "best[height<=720]/best", "-g",
@@ -191,28 +178,27 @@ def grab(youtube_url):
             m3u8_url = result.stdout.strip()
             
             if m3u8_url and ("googlevideo.com" in m3u8_url or "m3u8" in m3u8_url.lower()):
-                print("解析成功!")
-                logging.info(f"策略 {strategy['name']} 成功")
+                print("解析成功")
+                logging.info("策略成功: " + strategy['name'])
                 return m3u8_url
                 
         except Exception as e:
-            print(f"策略失敗: {str(e)[:50]}")
+            print("策略失敗")
         
         time.sleep(1)
     
-    logging.error(f"所有策略失敗: {youtube_url}")
+    logging.error("所有策略失敗")
     return "https://raw.githubusercontent.com/jz168k/YT2m/main/assets/no_s.m3u8"
 
-# ===== 解析 yt_info.txt =====
 def process_yt_info():
     if not os.path.exists(yt_info_path):
-        print(f"未找到 {yt_info_path}")
+        print("未找到 yt_info.txt")
         return
         
     try:
         with open(yt_info_path, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
-        logging.info(f"讀取 yt_info.txt 成功，共 {len(lines)} 行")
+        logging.info("讀取 yt_info.txt 成功")
 
         i = 1
         entries = lines[2:]
@@ -221,53 +207,48 @@ def process_yt_info():
                 continue
             info_line = entries[j]
             youtube_url = entries[j + 1]
-            channel_name = info_line.split("|")[0].strip() or f"Channel{i:02d}"
+            channel_name = info_line.split("|")[0].strip() or "Channel%02d" % i
 
-            print(f"
-處理頻道 {i}: {channel_name}")
-            print(f"YouTube URL: {youtube_url}")
+            print("處理頻道 " + str(i) + ": " + channel_name)
+            print("YouTube URL: " + youtube_url)
             
             m3u8_url = grab(youtube_url)
 
-            # 儲存 m3u8
-            output_m3u8 = os.path.join(output_dir, f"y{i:02d}.m3u8")
+            output_m3u8 = os.path.join(output_dir, "y%02d.m3u8" % i)
             with open(output_m3u8, "w", encoding="utf-8") as f:
-                f.write(f"#EXTM3U
+                f.write("#EXTM3U
 #EXT-X-STREAM-INF:BANDWIDTH=1280000
-{m3u8_url}
+" + m3u8_url + "
 ")
-            logging.info(f"生成 m3u8: y{i:02d}.m3u8")
+            logging.info("生成 m3u8: y%02d.m3u8" % i)
 
-            # 儲存 php
-            output_php = os.path.join(output_dir, f"y{i:02d}.php")
+            output_php = os.path.join(output_dir, "y%02d.php" % i)
             with open(output_php, "w", encoding="utf-8") as f:
-                f.write(f"<?php
-header('Location: {m3u8_url}');
+                f.write("<?php
+header('Location: " + m3u8_url + "');
 ?>")
-            logging.info(f"生成 php: y{i:02d}.php")
+            logging.info("生成 php: y%02d.php" % i)
 
-            print(f"完成: y{i:02d}.m3u8 和 y{i:02d}.php")
+            print("完成: y%02d.m3u8 和 y%02d.php" % (i, i))
             i += 1
             time.sleep(2)
 
     except Exception as e:
-        logging.error(f"處理 yt_info.txt 失敗: {e}")
-        print(f"處理 yt_info.txt 失敗: {e}")
+        logging.error("處理 yt_info.txt 失敗: " + str(e))
+        print("處理失敗: " + str(e))
 
-# ===== SFTP 上傳 =====
 def upload_files():
-    print("
-啟動 SFTP 上傳...")
+    print("啟動 SFTP 上傳")
     try:
         transport = paramiko.Transport((SFTP_HOST, SFTP_PORT))
         transport.connect(username=SFTP_USER, password=SFTP_PASSWORD)
         sftp = paramiko.SFTPClient.from_transport(transport)
-        print(f"SFTP 連線成功: {SFTP_HOST}")
+        print("SFTP 連線成功: " + SFTP_HOST)
 
         try:
             sftp.chdir(SFTP_REMOTE_DIR)
         except IOError:
-            print(f"創建遠端目錄: {SFTP_REMOTE_DIR}")
+            print("創建遠端目錄")
             sftp.mkdir(SFTP_REMOTE_DIR)
             sftp.chdir(SFTP_REMOTE_DIR)
 
@@ -276,32 +257,31 @@ def upload_files():
             local_path = os.path.join(output_dir, file)
             if os.path.isfile(local_path):
                 remote_path = os.path.join(SFTP_REMOTE_DIR, file)
-                print(f"上傳 {file}")
+                print("上傳 " + file)
                 sftp.put(local_path, remote_path)
                 uploaded_count += 1
 
         sftp.close()
         transport.close()
-        print(f"上傳完成！共 {uploaded_count} 個檔案")
-        logging.info(f"SFTP 上傳完成，共 {uploaded_count} 個檔案")
+        print("上傳完成，共 " + str(uploaded_count) + " 個檔案")
+        logging.info("SFTP 上傳完成，共 " + str(uploaded_count) + " 個檔案")
         
     except Exception as e:
-        print(f"SFTP 上傳失敗: {e}")
-        logging.error(f"SFTP 上傳失敗: {e}")
+        print("SFTP 上傳失敗: " + str(e))
+        logging.error("SFTP 上傳失敗: " + str(e))
 
-# ===== 主程式 =====
 if __name__ == "__main__":
-    print("YouTube 直播 M3U8 解析器 (GitHub Actions 版)")
+    print("YouTube 直播 M3U8 解析器")
     
     try:
         result = subprocess.run(["yt-dlp", "--version"], capture_output=True, text=True)
-        print(f"yt-dlp 版本: {result.stdout.strip()}")
+        print("yt-dlp 版本: " + result.stdout.strip())
     except:
         print("未安裝 yt-dlp")
         exit(1)
     
-    print(f"API Key: {'有' if YOUTUBE_API_KEY else '無'}")
-    print(f"Cookies: {'有' if os.path.exists(cookies_path) else '無'}")
+    print("API Key: " + ("有" if YOUTUBE_API_KEY else "無"))
+    print("Cookies: " + ("有" if os.path.exists(cookies_path) else "無"))
     print("SFTP: 有")
     
     start_time = time.time()
@@ -309,5 +289,5 @@ if __name__ == "__main__":
     upload_files()
     
     elapsed_time = time.time() - start_time
-    print(f"總執行時間: {elapsed_time:.2f} 秒")
-    logging.info(f"執行完成，總時間: {elapsed_time:.2f} 秒")
+    print("總執行時間: " + str(round(elapsed_time, 2)) + " 秒")
+    logging.info("執行完成，總時間: " + str(elapsed_time) + " 秒")
