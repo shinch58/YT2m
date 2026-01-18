@@ -3,9 +3,10 @@ import subprocess
 import time
 import json
 import logging
+import re
 import paramiko
 import requests
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 # ========= Paths =========
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -40,26 +41,70 @@ SFTP_PASS = p.password
 SFTP_DIR = p.path or "/"
 
 # ========= Config =========
-USE_API_CHECK = False
 GEO_BYPASS = True
 GEO_COUNTRY = "TW"
 NO_STREAM = "https://raw.githubusercontent.com/jz168k/YT2m/main/assets/no_s.m3u8"
 
-# ========= yt-dlp helpers =========
-def is_live_ytdlp(url):
-    try:
-        r = subprocess.run(
-            ["yt-dlp", "--dump-json", url],
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        info = json.loads(r.stdout)
-        return info.get("is_live", False)
-    except:
-        return False
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/120.0",
+    "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8"
+}
 
-def grab_m3u8(url):
+# ========= Cookies for requests =========
+def load_cookies():
+    jar = requests.cookies.RequestsCookieJar()
+    if not os.path.exists(COOKIES_PATH):
+        return jar
+    with open(COOKIES_PATH, "r", encoding="utf-8", errors="ignore") as f:
+        for line in f:
+            if line.startswith("#") or "\t" not in line:
+                continue
+            parts = line.strip().split("\t")
+            if len(parts) >= 7:
+                jar.set(parts[5], parts[6], domain=parts[0])
+    return jar
+
+REQ_COOKIES = load_cookies()
+
+# ========= HTML direct grab =========
+def grab_m3u8_from_html(url):
+    print("🌐 HTML 直抓")
+    try:
+        r = requests.get(
+            url,
+            headers=HEADERS,
+            cookies=REQ_COOKIES,
+            timeout=15
+        )
+        html = r.text
+
+        # 1️⃣ 直接找 m3u8
+        m = re.findall(r"https://[^\"']+\.m3u8[^\"']*", html)
+        for u in m:
+            u = unquote(u)
+            if "googlevideo.com" in u:
+                print("✅ HTML 直接命中 m3u8")
+                return u
+
+        # 2️⃣ ytInitialPlayerResponse
+        m = re.search(r"ytInitialPlayerResponse\s*=\s*({.+?});", html)
+        if m:
+            data = json.loads(m.group(1))
+            streams = (
+                data.get("streamingData", {})
+                    .get("hlsManifestUrl")
+            )
+            if streams:
+                print("✅ playerResponse 命中 m3u8")
+                return streams
+
+    except Exception as e:
+        logging.warning("HTML grab failed: %s", e)
+
+    return None
+
+# ========= yt-dlp fallback =========
+def grab_m3u8_ytdlp(url):
     strategies = [
         "youtube:player_client=android",
         "youtube:player_client=android_embedded",
@@ -88,12 +133,26 @@ def grab_m3u8(url):
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=45)
             m3u8 = r.stdout.strip()
             if "m3u8" in m3u8 and "googlevideo.com" in m3u8:
+                print("✅ yt-dlp 命中 m3u8")
                 return m3u8
         except:
             pass
 
         time.sleep(1)
 
+    return None
+
+# ========= Main grab =========
+def grab(url):
+    m3u8 = grab_m3u8_from_html(url)
+    if m3u8:
+        return m3u8
+
+    m3u8 = grab_m3u8_ytdlp(url)
+    if m3u8:
+        return m3u8
+
+    print("⚠️ fallback no_s")
     return NO_STREAM
 
 # ========= Process =========
@@ -110,7 +169,7 @@ def process():
         url = items[i + 1]
 
         print(f"📺 {name}")
-        m3u8 = grab_m3u8(url)
+        m3u8 = grab(url)
 
         with open(os.path.join(OUTPUT_DIR, f"y{idx:02d}.m3u8"), "w") as f:
             f.write("#EXTM3U\n")
@@ -147,9 +206,9 @@ def upload():
     sftp.close()
     t.close()
 
-# ========= Main =========
+# ========= Entry =========
 if __name__ == "__main__":
-    print("🚀 yt_m.py start")
+    print("🚀 yt_m.py start (HTML first)")
     subprocess.run(["yt-dlp", "--version"])
     process()
     upload()
